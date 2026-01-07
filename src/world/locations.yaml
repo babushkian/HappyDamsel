@@ -1,0 +1,25 @@
+attic:
+  name: "Чердак"
+  description: "Пыльный чердак со старой шкатулкой"
+  containers:
+    wooden_box:
+      name: "Шкатулка"
+      description: "Потемневшая от времени деревянная шкатулка."
+      locked: true
+      open: false
+      contents:
+        - gold_ring
+  items:
+    - hammer
+
+hall:
+  name: "Прихожая"
+  description: "Низ под чердаком"
+  containers:
+    iron_chest:
+      name: "Сундук"
+      description: "Окованный металлическими полосами сундук."
+      locked: false
+      open: true
+      contents:
+        - note

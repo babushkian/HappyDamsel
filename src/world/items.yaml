@@ -1,0 +1,20 @@
+
+rusty_key:
+  name: "Ржавый ключ"
+  description: "Изящный ключик, но видно что он много времени пролежал в сырости."
+  consumable: true
+
+gold_ring:
+  name: "Золотое кольцо"
+  description: "Кольцо сияет как новое."
+  consumable: false
+
+note:
+  name: "Старая записка"
+  description: "Сложенная вчетверо записка на пожелтевшей бумаге."
+  consumable: false
+
+hammer:
+  name: "Молоток."
+  description: "Увесистый молоток с деревянной ручкой."
+  consumable: false

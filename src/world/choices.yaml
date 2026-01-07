@@ -14,8 +14,14 @@ choices:
       - type: reveal_contents
         container: wooden_box
 
-  go_down:
+  go_down_to_hall:
     text: "Спуститься вниз"
     effects:
       - type: move_to
         location: hall
+
+  go_up_to_attic:
+    text: "Подняться на чердак"
+    effects:
+      - type: move_to
+        location: attic

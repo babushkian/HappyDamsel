@@ -108,9 +108,11 @@ content_file =CONTENT_DIR / "choices.yaml"
 with content_file.open(mode="r", encoding="utf-8") as file:
     yaml_choices = yaml.safe_load(file.read())
 load_choices_raw(yaml_choices)
-pprint(CHOICES_RAW)
-print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
+with (CONTENT_DIR / "items.yaml").open(mode="r", encoding="utf-8") as file:
+    raw_item_data = yaml.safe_load(file.read())
+with (CONTENT_DIR / "locations.yaml").open(mode="r", encoding="utf-8") as file:
+    raw_location_data = yaml.safe_load(file.read())
 
 Condition = Callable[[], bool]
 Effect = Callable[[], None]
@@ -214,66 +216,86 @@ class Choice:
 
 # идентификаторы
 RUSTY_KEY = ItemId("rusty_key")
-GOLD_RING = ItemId("gold_ring")
+# GOLD_RING = ItemId("gold_ring")
 BOX = ObjectId("wooden_box")
-CHEST = ObjectId("iron_chest")
+# CHEST = ObjectId("iron_chest")
 ATTIC = LocationId("attic")
-HALL = LocationId("hall")
+# HALL = LocationId("hall")
 
-# локации
-attic_loc = Location(
-    id=ATTIC, name="Чердак", description="Пыльный чердак со старой шкатулкой."
-)
-hall_loc = Location(id=HALL, name="Прихожая", description="Низ под чердаком.")
 
-# контейнеры привязаны к локациям (только в текущей локации доступны)
-attic_loc.containers[BOX] = Container(
-    id=BOX,
-    locked=True,
-    open=False,
-    contents=[GOLD_RING]
-)
+def build_item(iid: str,  data: dict):
+    item_id = ItemId(iid)
+    ITEMS[item_id] = Item(
+            id=item_id,
+            name=data["name"],
+            description=data["description"],
+            consumable=data["consumable"],
+        )
 
-hall_loc.containers[CHEST] = Container(
-    id=CHEST,
-    locked=False,
-    open=True,
-    contents=[ItemId("note")]
-)
 
+def build_location( lid: str,  data: dict):
+    location_id = LocationId(lid)
+    loc = Location(
+        id=location_id,
+        name=data["name"],
+        description=data["description"],
+        containers={},
+    )
+    containers:dict[ObjectId, Container] = {}
+    for cid, cont_data in data.get("containers", {}).items():
+        container_id = ObjectId(cid)
+        containers[container_id] = Container(
+            id=container_id,
+            locked=cont_data["locked"],
+            open=cont_data["open"],
+            contents=[ItemId(iid) for iid in cont_data.get("contents", [])]
+        )
+    loc.containers = containers
+    LOCATIONS[location_id] = loc
+
+for  iid, raw in raw_item_data.items():
+    build_item(iid, raw)
+
+for  lid, raw in raw_location_data.items():
+    build_location(lid, raw)
+
+pprint(ITEMS)
 # инвентарь с ключом
 inventory = Inventory(items={RUSTY_KEY: 1})
 
 # состояние игры
 state = GameState(
     current_location=ATTIC,
-    locations={ATTIC: attic_loc, HALL: hall_loc},
+    # locations={ATTIC: attic_loc, HALL: hall_loc},
+    locations=LOCATIONS,
     inventory=inventory,
     flags={},
 )
+
+
 CHOICES: dict[str, Choice]={}
-
-for  cid, struct in CHOICES_RAW.items():
-
+def build_choice(state: GameState, cid: str,  data: dict):
     conditions: list[Condition] = []
-    for c in struct.get("conditions", []):
+    for c in data.get("conditions", []):
         conditions.append( CONDITIONS[c["type"]](state, c))
-
     effects: list[Effect] = []
-    for e in struct.get("effects", []):
+    for e in data.get("effects", []):
         effects.append( EFFECTS[e["type"]](state, e))
     CHOICES[cid] = Choice(
         id=cid,
-        text=struct["text"],
+        text=data["text"],
         when=conditions,
         do=effects
     )
+
+for  cid, struct in CHOICES_RAW.items():
+    build_choice(state, cid, struct)
+
 open_box = CHOICES["open_box"]
-go_down = CHOICES["go_down"]
+go_down = CHOICES["go_down_to_hall"]
+up_to_attic = CHOICES["go_up_to_attic"]
 
 
-
-# Демонстрация (без async — просто последовательное применение)
 def show_inventory(inv: Inventory):
     return {k.value: v for k, v in inv.items.items()}
 
@@ -297,6 +319,10 @@ if go_down.is_available():
 
 # Попытка получить контейнер, который не в текущей локации — выдаст ошибку
 try:
-    state.get_container(BOX)  # BOX теперь не в прихожей
+    state.get_container(BOX)  # BOX осталась в локации Чердак
 except ValueError as exc:
     print("Ошибка доступа к контейнеру:", exc)
+
+if up_to_attic.is_available():
+    up_to_attic.apply()
+    print("После перемещения наверх — локация:", state.location().name)
