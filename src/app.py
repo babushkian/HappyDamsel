@@ -1,5 +1,17 @@
 from typing import Callable
 from dataclasses import dataclass, field
+import yaml
+from pathlib import Path
+from pprint import pprint
+
+CONTENT_DIR = Path(__file__).resolve().parent / "world"
+print(CONTENT_DIR)
+content_file =CONTENT_DIR / "choices.yaml"
+print(content_file, content_file.exists())
+
+with content_file.open(mode="r", encoding="utf-8") as file:
+    yaml_data = yaml.safe_load(file.read())
+pprint(yaml_data)
 
 @dataclass(frozen=True)
 class ItemId:
