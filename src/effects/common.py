@@ -14,28 +14,28 @@ def register_effect(name: str):
 
 
 @register_effect("consume_item")
-def make_consume_item(state: GameState, data: dict):
+def make_consume_item(data: dict):
     item = ItemId(data["item"])
 
-    def _effect():
+    def _effect(state: GameState):
         state.inventory.remove(item)
 
     return _effect
 
 @register_effect("unlock_container")
-def make_unlock_and_open(state: GameState, data: dict) -> Effect:
+def make_unlock_and_open(data: dict) -> Effect:
     cid = ObjectId(data["container"])
 
-    def _effect() -> None:
+    def _effect(state: GameState) -> None:
         c = state.get_container(cid)
         c.locked = False
         c.open = True
     return _effect
 
 @register_effect("reveal_contents")
-def make_reveal_contents(state: GameState, data: dict) -> Effect:
+def make_reveal_contents(data: dict) -> Effect:
     cid = ObjectId(data["container"])
-    def _effect() -> None:
+    def _effect(state: GameState) -> None:
         c = state.get_container(cid)
         for item in c.contents:
             state.inventory.add(item)
@@ -43,9 +43,9 @@ def make_reveal_contents(state: GameState, data: dict) -> Effect:
     return _effect
 
 @register_effect("move_to")
-def make_move_to(state: GameState, data: dict) -> Effect:
+def make_move_to(data: dict) -> Effect:
     lid = LocationId(data["location"])
-    def _effect() -> None:
+    def _effect(state: GameState) -> None:
         state.move_to(lid)
     return _effect
 

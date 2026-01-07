@@ -1,5 +1,4 @@
-from definitions import Choice
-from loader import LOCATIONS, CHOICES
+from loader import LOCATIONS, CHOICES, INVENTORY
 from definitions import ItemId, ObjectId, LocationId, GameState, Inventory
 
 
@@ -12,15 +11,12 @@ ATTIC = LocationId("attic")
 # HALL = LocationId("hall")
 
 
-# инвентарь с ключом
-inventory = Inventory(items={RUSTY_KEY: 1})
 
 # состояние игры
 state = GameState(
     current_location=ATTIC,
-    # locations={ATTIC: attic_loc, HALL: hall_loc},
     locations=LOCATIONS,
-    inventory=inventory,
+    inventory=INVENTORY,
     flags={},
 )
 
@@ -38,8 +34,8 @@ print("Текущая локация:", state.location().name)  # Чердак
 print("Инвентарь до:", show_inventory(state.inventory))
 
 # Попробуем открыть шкатулку в чердаке
-if open_box.is_available():
-    open_box.apply()
+if open_box.is_available(state):
+    open_box.apply(state)
     print("Шкатулка открыта, содержимое добавлено в инвентарь.")
 else:
     print("Условия для открытия шкатулки не выполнены.")
@@ -47,8 +43,8 @@ else:
 print("Инвентарь после:", show_inventory(state.inventory))
 
 # Перейдём вниз (через эффект)
-if go_down.is_available():
-    go_down.apply()
+if go_down.is_available(state):
+    go_down.apply(state)
     print("После перемещения — локация:", state.location().name)
 
 # Попытка получить контейнер, который не в текущей локации — выдаст ошибку
@@ -57,6 +53,6 @@ try:
 except ValueError as exc:
     print("Ошибка доступа к контейнеру:", exc)
 
-if up_to_attic.is_available():
-    up_to_attic.apply()
+if up_to_attic.is_available(state):
+    up_to_attic.apply(state)
     print("После перемещения наверх — локация:", state.location().name)

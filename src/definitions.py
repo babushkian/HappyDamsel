@@ -45,6 +45,7 @@ class Location:
 @dataclass
 class Inventory:
     items: dict[ItemId, int]
+
     def has(self, item: ItemId) -> bool:
         return self.items.get(item, 0) > 0
 
@@ -85,10 +86,8 @@ class GameState:
         return loc.containers[cid]
 
 
-
-Condition = Callable[[], bool]
-Effect = Callable[[], None]
-
+Condition = Callable[[GameState], bool]
+Effect = Callable[[GameState], None]
 
 
 @dataclass
@@ -98,12 +97,12 @@ class Choice:
     when: list[Condition]
     do: list[Effect]
 
-    def is_available(self) -> bool:
-        return all(cond() for cond in self.when)
+    def is_available(self, state: GameState) -> bool:
+        return all(cond(state) for cond in self.when)
 
-    def apply(self) -> None:
-        if not self.is_available():
+    def apply(self, state: GameState) -> None:
+        if not self.is_available(state):
             raise RuntimeError("Conditions not met")
         for effect in self.do:
-            effect()
+            effect(state)
 
