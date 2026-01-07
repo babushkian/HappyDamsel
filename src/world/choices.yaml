@@ -1,0 +1,14 @@
+id: open_box
+text: "Открыть шкатулку"
+conditions:
+  - type: has_item
+    item: rusty_key
+  - type: container_locked
+    container: wooden_box
+effects:
+  - type: consume_item
+    item: rusty_key
+  - type: unlock_container
+    container: wooden_box
+  - type: reveal_contents
+    container: wooden_box
