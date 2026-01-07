@@ -1,4 +1,6 @@
-from loader import LOCATIONS, CHOICES, INVENTORY
+from pprint import pprint
+from init_content import ContentLoader
+from loaders import YamlLoader
 from definitions import ItemId, ObjectId, LocationId, GameState, Inventory
 
 
@@ -10,20 +12,24 @@ BOX = ObjectId("wooden_box")
 ATTIC = LocationId("attic")
 # HALL = LocationId("hall")
 
-
+cl = ContentLoader(YamlLoader)
+content = cl.init_content()
+print("=====================")
+pprint(content)
+del cl
 
 # состояние игры
 state = GameState(
     current_location=ATTIC,
-    locations=LOCATIONS,
-    inventory=INVENTORY,
+    locations=content.locations,
+    inventory=content.inventory,
     flags={},
 )
 
 
-open_box = CHOICES["open_box"]
-go_down = CHOICES["go_down_to_hall"]
-up_to_attic = CHOICES["go_up_to_attic"]
+open_box = content.choices["open_box"]
+go_down = content.choices["go_down_to_hall"]
+up_to_attic = content.choices["go_up_to_attic"]
 
 
 def show_inventory(inv: Inventory):
