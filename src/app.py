@@ -5,13 +5,6 @@ from pathlib import Path
 from pprint import pprint
 
 CONTENT_DIR = Path(__file__).resolve().parent / "world"
-print(CONTENT_DIR)
-content_file =CONTENT_DIR / "choices.yaml"
-print(content_file, content_file.exists())
-
-with content_file.open(mode="r", encoding="utf-8") as file:
-    yaml_data = yaml.safe_load(file.read())
-pprint(yaml_data)
 
 @dataclass(frozen=True)
 class ItemId:
@@ -28,6 +21,13 @@ class LocationId:
 @dataclass(frozen=True)
 class LocationId:
     value: str
+
+@dataclass
+class Item:
+    id: ItemId
+    name: str
+    description: str
+    consumable: bool = False
 
 
 @dataclass
@@ -95,6 +95,23 @@ class GameState:
 
 #-------------------------
 #-------------------------
+
+ITEMS: dict[ItemId, Item] = {}
+LOCATIONS: dict[LocationId, Location] = {}
+CHOICES_RAW: dict[str, dict] = {}
+
+def load_choices_raw(data: dict):
+    for cid, raw in data["choices"].items():
+        CHOICES_RAW[cid] = raw
+
+content_file =CONTENT_DIR / "choices.yaml"
+with content_file.open(mode="r", encoding="utf-8") as file:
+    yaml_choices = yaml.safe_load(file.read())
+load_choices_raw(yaml_choices)
+pprint(CHOICES_RAW)
+print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+
+
 Condition = Callable[[], bool]
 Effect = Callable[[], None]
 ConditionFactory = Callable[[GameState, dict], Condition]
@@ -234,28 +251,25 @@ state = GameState(
     inventory=inventory,
     flags={},
 )
+CHOICES: dict[str, Choice]={}
 
+for  cid, struct in CHOICES_RAW.items():
 
-open_box = Choice(
-    id="open_box",
-    text="Открыть шкатулку",
-    when=[
-        CONDITIONS["has_item"](state, {"item": "rusty_key"}),
-        CONDITIONS["container_locked"](state, {"container": "wooden_box"}),
-    ],
-    do=[
-        EFFECTS["consume_item"](state, {"item": "rusty_key"}),
-        EFFECTS["unlock_container"](state, {"container": "wooden_box"}),
-        EFFECTS["reveal_contents"](state, {"container": "wooden_box"}),
-    ],
-)
+    conditions: list[Condition] = []
+    for c in struct.get("conditions", []):
+        conditions.append( CONDITIONS[c["type"]](state, c))
 
-go_down = Choice(
-    id="go_down",
-    text="Спуститься вниз",
-    when=[],
-    do=[EFFECTS["move_to"](state, {"location": "hall"})],
-)
+    effects: list[Effect] = []
+    for e in struct.get("effects", []):
+        effects.append( EFFECTS[e["type"]](state, e))
+    CHOICES[cid] = Choice(
+        id=cid,
+        text=struct["text"],
+        when=conditions,
+        do=effects
+    )
+open_box = CHOICES["open_box"]
+go_down = CHOICES["go_down"]
 
 
 
