@@ -41,6 +41,7 @@ class Location:
     name: str
     description: str = ""
     containers: dict[ObjectId, Container] = field(default_factory=dict)
+    items: list[ItemId] = field(default_factory=list)
 
 
 

@@ -47,6 +47,13 @@ class Game:
         for c in loc.containers:
             container = self.state.get_container(c)
             print(container.description)
+        if loc.items:
+            for iid in loc.items:
+                item_names: list[str] = []
+                item_names.append(content.items[iid].name.lower())
+
+            print(f"Здесь находится: {", ".join(item_names)}")
+
 
 
     def render_choices(self):

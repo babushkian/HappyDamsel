@@ -77,6 +77,8 @@ class ContentLoader:
                 contents=[ItemId(iid) for iid in cont_data.get("contents", [])]
             )
         loc.containers = containers
+        raw_items = data.get("items", [])
+        loc.items = [ItemId(iid) for iid in raw_items]
         self.LOCATIONS[location_id] = loc
 
 
