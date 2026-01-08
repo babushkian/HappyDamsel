@@ -99,6 +99,7 @@ class ContentLoader:
         self.CHOICES[cid] = Choice(
             id=cid,
             text=data["text"],
+            description=data["description"],
             when=conditions,
             do=effects
         )

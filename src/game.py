@@ -14,8 +14,6 @@ ATTIC = LocationId("attic")
 
 cl = ContentLoader(YamlLoader)
 content = cl.init_content()
-print("=====================")
-pprint(content)
 del cl
 
 # состояние игры
@@ -52,7 +50,6 @@ class Game:
 
 
     def render_choices(self):
-        print(content.choices)
         counter = 1
         option_associations: dict[str, Choice] = {}
         for c in content.choices.values():
@@ -68,45 +65,10 @@ class Game:
             option = input(">")
             if  option not in available_options:
                 print("Неверная опция!")
-            content.choices[associations[option]].apply(self.state)
+            action = content.choices[associations[option]].apply(self.state)
+            print(action)
             break
 
 
 game = Game(state)
 game.run()
-
-# open_box = content.choices["open_box"]
-# go_down = content.choices["go_down_to_hall"]
-# up_to_attic = content.choices["go_up_to_attic"]
-#
-#
-# def show_inventory(inv: Inventory):
-#     return {k.value: v for k, v in inv.items.items()}
-#
-#
-# print("Текущая локация:", state.location().name)  # Чердак
-# print("Инвентарь до:", show_inventory(state.inventory))
-#
-# # Попробуем открыть шкатулку в чердаке
-# if open_box.is_available(state):
-#     open_box.apply(state)
-#     print("Шкатулка открыта, содержимое добавлено в инвентарь.")
-# else:
-#     print("Условия для открытия шкатулки не выполнены.")
-#
-# print("Инвентарь после:", show_inventory(state.inventory))
-#
-# # Перейдём вниз (через эффект)
-# if go_down.is_available(state):
-#     go_down.apply(state)
-#     print("После перемещения — локация:", state.location().name)
-#
-# # Попытка получить контейнер, который не в текущей локации — выдаст ошибку
-# try:
-#     state.get_container(BOX)  # BOX осталась в локации Чердак
-# except ValueError as exc:
-#     print("Ошибка доступа к контейнеру:", exc)
-#
-# if up_to_attic.is_available(state):
-#     up_to_attic.apply(state)
-#     print("После перемещения наверх — локация:", state.location().name)
