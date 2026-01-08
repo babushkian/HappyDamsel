@@ -16,12 +16,18 @@ choices:
 
   go_down_to_hall:
     text: "Спуститься вниз"
+    conditions:
+      - type: in_location
+        location: attic
     effects:
       - type: move_to
         location: hall
 
   go_up_to_attic:
     text: "Подняться на чердак"
+    conditions:
+      - type: in_location
+        location: hall
     effects:
       - type: move_to
         location: attic

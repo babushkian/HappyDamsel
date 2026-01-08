@@ -1,5 +1,5 @@
 from typing import Callable
-from definitions import GameState, ObjectId, ItemId, Condition
+from definitions import GameState, ObjectId, ItemId, LocationId
 
 Condition = Callable[[GameState], bool]
 ConditionFactory = Callable[[dict], Condition]
@@ -38,3 +38,9 @@ def container_locked(data: dict) -> Condition:
             return False
     return _cond
 
+@register_condition("in_location")
+def container_locked(data: dict) -> Condition:
+    lid = LocationId(data["location"])
+    def _cond(state: GameState) -> bool:
+        return state.current_location == lid
+    return _cond
