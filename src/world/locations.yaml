@@ -4,7 +4,7 @@ attic:
   containers:
     wooden_box:
       name: "Шкатулка"
-      description: "Потемневшая от времени деревянная шкатулка."
+      description: "На столе стоит старая деревянная шкатулка со ржавым замком."
       locked: true
       open: false
       contents:
@@ -18,7 +18,7 @@ hall:
   containers:
     iron_chest:
       name: "Сундук"
-      description: "Окованный металлическими полосами сундук."
+      description: "В углу стоит окованный металлическими полосами сундук."
       locked: false
       open: true
       contents:

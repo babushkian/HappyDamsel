@@ -29,6 +29,8 @@ class Item:
 @dataclass
 class Container:
     id: ObjectId
+    name: str
+    description: str
     locked: bool
     open: bool
     contents: list[ItemId]
@@ -68,6 +70,7 @@ class GameState:
     locations: dict[LocationId, Location] = field(default_factory=dict)
     inventory: Inventory = field(default_factory=Inventory)
     flags: dict[str, bool] = field(default_factory=dict)
+
     def location(self) -> Location:
         return self.locations[self.current_location]
 

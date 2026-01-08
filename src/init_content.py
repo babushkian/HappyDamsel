@@ -70,6 +70,8 @@ class ContentLoader:
             container_id = ObjectId(cid)
             containers[container_id] = Container(
                 id=container_id,
+                name=cont_data["name"],
+                description=cont_data["description"],
                 locked=cont_data["locked"],
                 open=cont_data["open"],
                 contents=[ItemId(iid) for iid in cont_data.get("contents", [])]
