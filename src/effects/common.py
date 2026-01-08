@@ -42,6 +42,17 @@ def make_reveal_contents(data: dict) -> Effect:
         c.contents.clear()
     return _effect
 
+@register_effect("get_item")
+def make_get_item(data: dict) -> Effect:
+    iid = ItemId(data["item"])
+
+    def _effect(state: GameState) -> None:
+        items = state.location().items
+        items.pop(items.index(iid))
+        state.inventory.add(iid)
+    return _effect
+
+
 @register_effect("move_to")
 def make_move_to(data: dict) -> Effect:
     lid = LocationId(data["location"])

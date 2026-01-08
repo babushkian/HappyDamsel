@@ -64,10 +64,33 @@ class Inventory:
             self.items[item] -= qty
 
 
+Condition = Callable[["GameState"], bool]
+Effect = Callable[["GameState"], None]
+
+
+@dataclass
+class Choice:
+    id: str
+    text: str
+    description: str
+    when: list[Condition] = field(default_factory=list)
+    do: list[Effect] = field(default_factory=list)
+
+    def is_available(self, state: "GameState") -> bool:
+        return all(cond(state) for cond in self.when)
+
+    def apply(self, state: "GameState") -> str:
+        if not self.is_available(state):
+            raise RuntimeError("Conditions not met")
+        for effect in self.do:
+            effect(state)
+        return self.description
+
 
 @dataclass
 class GameState:
     current_location: LocationId
+    return_location: LocationId | None = None
     locations: dict[LocationId, Location] = field(default_factory=dict)
     inventory: Inventory = field(default_factory=Inventory)
     flags: dict[str, bool] = field(default_factory=dict)
@@ -90,25 +113,5 @@ class GameState:
         return loc.containers[cid]
 
 
-Condition = Callable[[GameState], bool]
-Effect = Callable[[GameState], None]
 
-
-@dataclass
-class Choice:
-    id: str
-    text: str
-    description: str
-    when: list[Condition]
-    do: list[Effect]
-
-    def is_available(self, state: GameState) -> bool:
-        return all(cond(state) for cond in self.when)
-
-    def apply(self, state: GameState) -> str:
-        if not self.is_available(state):
-            raise RuntimeError("Conditions not met")
-        for effect in self.do:
-            effect(state)
-        return self.description
 

@@ -1,15 +1,8 @@
 from typing import Callable
-from definitions import GameState, ObjectId, ItemId, LocationId
+from definitions import GameState, ObjectId, ItemId, LocationId, Condition
 
-Condition = Callable[[GameState], bool]
+
 ConditionFactory = Callable[[dict], Condition]
-
-
-Effect = Callable[[GameState], None]
-EffectFactory = Callable[[dict], Effect]
-
-
-ConditionFactory = Callable[[GameState, dict], Condition]
 CONDITIONS: dict[str, ConditionFactory] = {}
 
 

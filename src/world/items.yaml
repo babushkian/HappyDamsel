@@ -15,6 +15,11 @@ note:
   consumable: false
 
 hammer:
-  name: "Молоток."
+  name: "Молоток"
   description: "Увесистый молоток с деревянной ручкой."
   consumable: false
+
+nail:
+  name: "Гвоздь"
+  description: "Чуть кривоватый гвоздь длинной сантиметров десять."
+  consumable: true

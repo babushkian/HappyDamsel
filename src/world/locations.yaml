@@ -11,6 +11,7 @@ attic:
         - gold_ring
   items:
     - hammer
+    - nail
 
 hall:
   name: "Коридор"
