@@ -32,7 +32,7 @@ def container_locked(data: dict) -> Condition:
     return _cond
 
 @register_condition("in_location")
-def container_locked(data: dict) -> Condition:
+def entity_in_location(data: dict) -> Condition:
     lid = LocationId(data["location"])
     def _cond(state: GameState) -> bool:
         return state.current_location == lid

@@ -3,20 +3,28 @@ from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
-class ItemId:
+class  Identifier(str):
     value: str
 
-@dataclass(frozen=True)
-class ObjectId:
-    value: str
+    def __new__(cls, value: str):
+        return super().__new__(cls, value)
 
-@dataclass(frozen=True)
-class LocationId:
-    value: str
+    def __str__(self):
+        return self
 
-@dataclass(frozen=True)
-class LocationId:
-    value: str
+
+class ItemId(Identifier):
+    pass
+
+
+
+class ObjectId(Identifier):
+    pass
+
+
+class LocationId(Identifier):
+    pass
+
 
 @dataclass
 class Item:
@@ -25,6 +33,10 @@ class Item:
     description: str
     consumable: bool = False
 
+    def describe(self, verbose: bool) -> str:
+        if verbose:
+            return f"{self.name}. {self.description}"
+        return f"{self.name.lower()}"
 
 @dataclass
 class Container:
@@ -35,14 +47,30 @@ class Container:
     open: bool
     contents: list[ItemId]
 
+    def describe(self, verbose: bool) -> str:
+        status = "(закрыто)" if not self.open else ""
+        status = "(заперто)" if self.locked else status
+        if verbose:
+            return f"{self.name} {status}. {self.description}"
+        return f"{self.name} {status}"
+
+
 @dataclass
 class Location:
     id: LocationId
     name: str
+    visited: bool = False
     description: str = ""
-    containers: dict[ObjectId, Container] = field(default_factory=dict)
+    containers: dict[ObjectId, Container] = field(default_factory=dict) # переписать сс словаря на список ObjectId
     items: list[ItemId] = field(default_factory=list)
 
+    def describe(self, verbose: bool) -> str:
+        if verbose:
+            return f"{self.name}\n{self.description}"
+        return self.name
+
+    def set_visited(self) -> None:
+        self.visited = True
 
 
 @dataclass
@@ -90,9 +118,9 @@ class Choice:
 @dataclass
 class GameState:
     current_location: LocationId
+    inventory: Inventory
     return_location: LocationId | None = None
     locations: dict[LocationId, Location] = field(default_factory=dict)
-    inventory: Inventory = field(default_factory=Inventory)
     flags: dict[str, bool] = field(default_factory=dict)
 
     def location(self) -> Location:

@@ -4,36 +4,60 @@ from effects import EFFECTS
 from content_parts import GameContent
 from init_content import ContentLoader
 from loaders import YamlLoader
-from definitions import ItemId, ObjectId, LocationId, GameState, Inventory, Choice
-from itertools import chain
+from definitions import  LocationId, GameState, Choice
 
-
-# идентификаторы
-RUSTY_KEY = ItemId("rusty_key")
-# GOLD_RING = ItemId("gold_ring")
-BOX = ObjectId("wooden_box")
-# CHEST = ObjectId("iron_chest")
-ATTIC = LocationId("attic")
-# HALL = LocationId("hall")
 
 cl = ContentLoader(YamlLoader)
-
 content = cl.init_content()
 del cl
 
 # состояние игры
 state = GameState(
-    current_location=ATTIC,
+    current_location=LocationId("attic"),
     locations=content.locations,
     inventory=content.inventory,
     flags={},
 )
 
 @dataclass
+class GameRenderer:
+    state: GameState
+    content: GameContent
+
+    def render_location(self, verbose: bool = False):
+        description = ""
+        loc = self.state.location()
+        if not loc:
+            raise ValueError(f"Локация не найдена")
+        description += loc.describe(verbose) + "\n"
+
+        for c in loc.containers.keys():
+            container = self.state.get_container(c)
+            description += container.describe(verbose) + "\n"
+        if loc.items:
+            item_names: list[str] = []
+            for iid in loc.items:
+                item_names.append(self.content.items[iid].describe(verbose))
+            description += f"Здесь находится: {"\n".join(item_names)}\n"
+        return description
+
+
+
+    def render_choices(self, choices_dict: dict[str, Choice]) -> str:
+        description = ""
+        for n, c in  choices_dict.items():
+            description +=f"{n}. {c.text}\n"
+        return description
+
+
+
+@dataclass
 class Game:
     state: GameState
     content: GameContent
+    renderer: GameRenderer
     time: int = 0
+    previous_tick_location: LocationId | None = None
 
     def run(self):
         while self.time < 10:
@@ -42,29 +66,32 @@ class Game:
 
     def tick(self):
         self.time += 1
-        self.render_scene()
-        dynamic_choices = self.create_choices()
-        choices = self.render_choices(dynamic_choices)
-        self.process(choices)
-
-    def render_scene(self):
         loc = self.state.location()
-        print(loc.name)
-        print(loc.description)
-        for c in loc.containers:
-            container = self.state.get_container(c)
-            print(container.description)
-        if loc.items:
-            item_names: list[str] = []
-            for iid in loc.items:
-                item_names.append(self.content.items[iid].name.lower())
-            print(f"Здесь находится: {", ".join(item_names)}")
+        verbose = not loc.visited
+        loc.set_visited()
+        choices = self.get_available_choices()
+        choices_dict = {str(n): c for n, c in enumerate(choices, 1)}
+        choice_description = self.renderer.render_choices(choices_dict)
+        
+        # Печатаем описание локации только при первом посещении или смене локации
+        if verbose or self.state.current_location != self.previous_tick_location:
+            location_description = self.renderer.render_location(verbose)
+            print(location_description)
+            
+        print(choice_description)
+        self.process(choices_dict)
 
 
-    def create_choices(self) -> list[Choice]:
-        return self.create_pickup_choices()
+    def get_available_choices(self) -> list[Choice]:
+        choices: list[Choice] = []
+        for c in self.content.choices.values():
+            if c.is_available(self.state):
+                choices.append(c)
+        choices.extend(self.generate_pickup_choices_for_location())
+        return choices
 
-    def create_pickup_choices(self) -> list[Choice]:
+
+    def generate_pickup_choices_for_location(self) -> list[Choice]:
         loc = self.state.location()
         pickup_options: list[Choice] = []
         if loc:
@@ -72,7 +99,7 @@ class Game:
                 item = self.content.items[iid]
                 pickup_options.append(
                     Choice(
-                        id=f"{self.state.current_location.value}_get_{iid.value}",
+                        id=f"pick_up_{iid.value}",
                         text=f"Взять {item.name}",
                         description =f"Ты взял {item.name}",
                         do=[EFFECTS["get_item"]({"item": iid.value})]
@@ -81,17 +108,9 @@ class Game:
 
         return sorted(pickup_options, key=lambda i: i.text)
 
-    def render_choices(self, dynamic_choices) -> dict[str, Choice]:
-        counter = 1
-        option_associations: dict[str, Choice] = {}
-        for c in chain(self.content.choices.values(), dynamic_choices):
-            if c.is_available(self.state):
-                option_associations[str(counter)] = c
-                print(f"{counter}. {c.text}")
-                counter += 1
-        return option_associations
 
-    def process(self, associations):
+    def process(self, associations: dict[str, Choice]):
+        self.previous_tick_location = self.state.current_location
         available_options = list(associations)
         while True:
             option = input(">")
@@ -102,6 +121,6 @@ class Game:
             print(action_description)
             break
 
-
-game = Game(state, content)
+gr = GameRenderer(state, content)
+game = Game(state, content, gr)
 game.run()

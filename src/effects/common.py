@@ -2,7 +2,7 @@ from typing import Callable
 from definitions import GameState, ObjectId, ItemId, LocationId,  Effect
 
 
-EffectFactory = Callable[[GameState, dict], Effect]
+EffectFactory = Callable[[dict], Effect]
 EFFECTS: dict[str, EffectFactory] = {}
 
 
@@ -47,8 +47,7 @@ def make_get_item(data: dict) -> Effect:
     iid = ItemId(data["item"])
 
     def _effect(state: GameState) -> None:
-        items = state.location().items
-        items.pop(items.index(iid))
+        state.location().items.remove(iid)
         state.inventory.add(iid)
     return _effect
 
