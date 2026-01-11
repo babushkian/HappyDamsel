@@ -59,12 +59,12 @@ class Game:
     time: int = 0
     previous_tick_location: LocationId | None = None
 
-    def run(self):
+    def run(self) -> None:
         while self.time < 10:
             self.tick()
 
 
-    def tick(self):
+    def tick(self) -> None:
         self.time += 1
         loc = self.state.location()
         verbose = not loc.visited

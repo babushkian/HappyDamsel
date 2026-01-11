@@ -1,30 +1,23 @@
-from typing import Callable
+from typing import Callable, Self
 from dataclasses import dataclass, field
 
 
-@dataclass(frozen=True)
-class  Identifier(str):
-    value: str
-
-    def __new__(cls, value: str):
+class Identifier(str):
+    def __new__(cls, value: str) -> Self:
         return super().__new__(cls, value)
 
-    def __str__(self):
-        return self
-
+    @property
+    def value(self) -> str:
+        return str(self)
 
 class ItemId(Identifier):
     pass
 
-
-
 class ObjectId(Identifier):
     pass
 
-
 class LocationId(Identifier):
     pass
-
 
 @dataclass
 class Item:
@@ -80,10 +73,10 @@ class Inventory:
     def has(self, item: ItemId) -> bool:
         return self.items.get(item, 0) > 0
 
-    def add(self, item: ItemId, qty: int = 1):
+    def add(self, item: ItemId, qty: int = 1) -> None:
         self.items[item] = self.items.get(item, 0) + qty
 
-    def remove(self, item: ItemId, qty: int = 1):
+    def remove(self, item: ItemId, qty: int = 1) -> None:
         if self.items.get(item, 0) < qty:
             raise ValueError("Item not in inventory")
         if self.items[item] == qty:
