@@ -8,18 +8,13 @@ from definitions import  LocationId, GameState, Choice
 
 
 cl = ContentLoader(YamlLoader)
-content = cl.init_content()
+content, state = cl.init_content()
 for c in content.choices.values():
     print(c)
 del cl
 
 # состояние игры
-state = GameState(
-    current_location=LocationId("attic"),
-    locations=content.locations,
-    inventory=content.inventory,
-    flags={},
-)
+
 
 @dataclass
 class GameRenderer:
@@ -28,18 +23,30 @@ class GameRenderer:
 
     def render_location(self, verbose: bool = False):
         description = ""
-        loc = self.state.location()
-        if not loc:
-            raise ValueError(f"Локация не найдена")
-        description += loc.describe(verbose) + "\n"
+        location = self.content.locations[self.state.current_location]
+        if verbose:
+            description += f"{location.name}\n{location.description}"
+        else:
+            description += location.name
+        description += "\n"
 
-        for c in loc.containers.keys():
-            container = self.state.get_container(c)
-            description += container.describe(verbose) + "\n"
-        if loc.items:
-            item_names: list[str] = []
-            for iid in loc.items:
-                item_names.append(self.content.items[iid].describe(verbose))
+        furniture = location.objects
+        for fid in furniture:
+            furn_def = self.content.furniture[fid]
+            if furn_def.kind == "container":
+                fs = self.state.objects[fid]
+                status = "(закрыто)" if not fs.flags["open"] else ""
+                status = "(заперто)" if fs.flags["locked"] else status
+                if verbose:
+                    description += f"{furn_def.name} {status}. {furn_def.description}"
+                else:
+                    description +=f"{furn_def.name} {status}"
+                description += "\n"
+
+        item_names: list[str] = []
+        for iid in self.state.locations_items[self.state.current_location]:
+            item_names.append(self.content.items[iid].name)
+        if item_names:
             description += f"Здесь находится: {"\n".join(item_names)}\n"
         return description
 
@@ -68,9 +75,9 @@ class Game:
 
     def tick(self) -> None:
         self.time += 1
-        loc = self.state.location()
-        verbose = not loc.visited
-        loc.set_visited()
+        verbose = self.state.current_location not in self.state.visited_locations
+
+
         choices = self.get_available_choices()
         choices_dict = {str(n): c for n, c in enumerate(choices, 1)}
         choice_description = self.renderer.render_choices(choices_dict)
@@ -94,19 +101,17 @@ class Game:
 
 
     def generate_pickup_choices_for_location(self) -> list[Choice]:
-        loc = self.state.location()
         pickup_options: list[Choice] = []
-        if loc:
-            for iid in loc.items:
-                item = self.content.items[iid]
-                pickup_options.append(
-                    Choice(
-                        id=f"pick_up_{iid.value}",
-                        text=f"Взять {item.name}",
-                        result_text =f"Ты взял {item.name}",
-                        do=[EFFECTS["get_item"]({"item": iid.value})]
-                    )
+        for iid in self.state.locations_items[self.state.current_location]:
+            item = self.content.items[iid]
+            pickup_options.append(
+                Choice(
+                    id=f"pick_up_{iid}",
+                    text=f"Взять {item.name}",
+                    result_text =f"Ты взял {item.name}",
+                    do=[EFFECTS["get_item"]({"item": iid})]
                 )
+            )
 
         return sorted(pickup_options, key=lambda i: i.text)
 

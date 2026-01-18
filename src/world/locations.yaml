@@ -1,22 +1,30 @@
 attic:
   name: "Чердак"
   description: "Пыльный чердак со старой шкатулкой"
-  containers:
+  furniture:
     wooden_box:
+      kind: "container"
       name: "Шкатулка"
       description: "На столе стоит старая деревянная шкатулка со ржавым замком."
+      can_open: true
+      can_lock: true
+      is_container: true
       locked: true
       open: false
       contents:
         - gold_ring
+
     pink_box:
+      kind: "container"
       name: "Розовая шкатулка"
       description: "На досках стоит маленькая шкатулка из темного дерева с розовыми прожилками."
+      can_open: true
+      can_lock: true
+      is_container: true
       locked: true
       open: false
       contents:
         - needle
-
   items:
     - hammer
     - nail
@@ -24,10 +32,14 @@ attic:
 hall:
   name: "Коридор"
   description: "Плохо освещенный коридор. Справа расположена дверь в кладовку. В конце коридора расположена крутая дереаянная лестница, поднимающаяся к люку на чердак."
-  containers:
+  furniture:
     iron_chest:
+      kind: "container"
       name: "Сундук"
       description: "В углу стоит окованный металлическими полосами сундук."
+      can_open: true
+      can_lock: true
+      is_container: true
       locked: false
       open: false
       contents:

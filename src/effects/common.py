@@ -27,19 +27,19 @@ def make_unlock_and_open(data: dict) -> Effect:
     cid = ObjectId(data["container"])
 
     def _effect(state: GameState) -> None:
-        c = state.get_container(cid)
-        c.locked = False
-        c.open = True
+        c = state.objects[cid]
+        c.flags["locked"] = False
+        c.flags["open"] = True
     return _effect
 
 @register_effect("reveal_contents")
 def make_reveal_contents(data: dict) -> Effect:
     cid = ObjectId(data["container"])
     def _effect(state: GameState) -> None:
-        c = state.get_container(cid)
-        for item in c.contents:
+        c = state.objects[cid]
+        for item in c.items:
             state.inventory.add(item)
-        c.contents.clear()
+        c.items.clear()
     return _effect
 
 @register_effect("get_item")
@@ -47,7 +47,7 @@ def make_get_item(data: dict) -> Effect:
     iid = ItemId(data["item"])
 
     def _effect(state: GameState) -> None:
-        state.location().items.remove(iid)
+        state.locations_items[state.current_location].remove(iid)
         state.inventory.add(iid)
     return _effect
 

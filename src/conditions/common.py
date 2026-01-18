@@ -26,7 +26,7 @@ def container_locked(data: dict) -> Condition:
 
     def _cond(state: GameState) -> bool:
         try:
-            return state.get_container(cid).locked
+            return state.objects[cid].flags["locked"]
         except ValueError:
             return False
     return _cond
