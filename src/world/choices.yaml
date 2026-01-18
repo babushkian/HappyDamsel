@@ -1,7 +1,7 @@
 choices:
   open_box:
     text: "Открыть шкатулку"
-    description: "Ты вставил в замочную щель шкатулки ржавый ключ.  Попытался провернуть его, но ключ тут де заклинило. Ты нажал посильнее, замок поддался, но щелк! и у тебя в руке остался ржавый огрызок ключа. Ты отбросил его и занялся содержимыш шкатулки. Что тут у нас? Золотое кольцо! Так, это мы забираем!"
+    #result_text   : "Ты вставил в замочную щель шкатулки ржавый ключ.  Попытался провернуть его, но ключ тут де заклинило. Ты нажал посильнее, замок поддался, но щелк! и у тебя в руке остался ржавый огрызок ключа. Ты отбросил его и занялся содержимыш шкатулки. Что тут у нас? Золотое кольцо! Так, это мы забираем!"
     conditions:
       - type: has_item
         item: rusty_key
@@ -14,10 +14,31 @@ choices:
         container: wooden_box
       - type: reveal_contents
         container: wooden_box
+    result_renderer:
+      - type: open_container
+        params:
+          container: wooden_box
+          item: rusty_key
+
+  open_pink_box:
+    text: "Открыть розовую шкатулку"
+    result_text: "Ты вставляешь в шкатулку розовый ключ, ее на мгновение озаряет розовое пламя, и она открывается. Ты обнаруживаешь на дне шкатулки крурную иголку и забираешь ее."
+    conditions:
+      - type: has_item
+        item: pink_key
+      - type: container_locked
+        container: pink_box
+    effects:
+      - type: consume_item
+        item: pink_key
+      - type: unlock_container
+        container: pink_box
+      - type: reveal_contents
+        container: pink_box
 
   go_down_to_hall:
     text: "Спуститься вниз"
-    description: "Ты спустился в прихожую."
+    result_text: "Ты спустился в прихожую."
     conditions:
       - type: in_location
         location: attic
@@ -27,7 +48,7 @@ choices:
 
   go_up_to_attic:
     text: "Подняться на чердак"
-    description: "Ты поднялся по деревянной лестнице на чердак."
+    result_text: "Ты поднялся по деревянной лестнице на чердак."
     conditions:
       - type: in_location
         location: hall

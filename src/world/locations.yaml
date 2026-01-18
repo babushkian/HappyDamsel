@@ -9,6 +9,14 @@ attic:
       open: false
       contents:
         - gold_ring
+    pink_box:
+      name: "Розовая шкатулка"
+      description: "На досках стоит маленькая шкатулка из темного дерева с розовыми прожилками."
+      locked: true
+      open: false
+      contents:
+        - needle
+
   items:
     - hammer
     - nail
@@ -24,3 +32,5 @@ hall:
       open: false
       contents:
         - note # записку нельзя прочитать в коридоре, надо выбраться в более светлое место.
+  items:
+    - pink_key

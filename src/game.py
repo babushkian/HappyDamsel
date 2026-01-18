@@ -9,6 +9,8 @@ from definitions import  LocationId, GameState, Choice
 
 cl = ContentLoader(YamlLoader)
 content = cl.init_content()
+for c in content.choices.values():
+    print(c)
 del cl
 
 # состояние игры
@@ -101,7 +103,7 @@ class Game:
                     Choice(
                         id=f"pick_up_{iid.value}",
                         text=f"Взять {item.name}",
-                        description =f"Ты взял {item.name}",
+                        result_text =f"Ты взял {item.name}",
                         do=[EFFECTS["get_item"]({"item": iid.value})]
                     )
                 )

@@ -23,3 +23,13 @@ nail:
   name: "Гвоздь"
   description: "Чуть кривоватый гвоздь длиной сантиметров десять."
   consumable: true
+
+pink_key:
+  name: "Розовый ключ"
+  description: "Маленький ключик, вокруг которого расходится еле заметное розовое сияние."
+  consumable: true
+
+needle:
+  name: "Иголка"
+  description: "Толстая сапожная иголка с широким ушком."
+  consumable: false

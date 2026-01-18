@@ -36,6 +36,7 @@ class ContentLoader:
         self.build_inventory(self.raw_content.inventory["items"])
 
         for cid, struct in self.raw_content.choices.items():
+            print(struct)
             self.build_choice(cid, struct)
 
         return GameContent(
@@ -65,7 +66,7 @@ class ContentLoader:
             description=data["description"],
             containers={},
         )
-        containers:dict[ObjectId, Container] = {}
+        containers: dict[ObjectId, Container] = {}
         for cid, cont_data in data.get("containers", {}).items():
             container_id = ObjectId(cid)
             containers[container_id] = Container(
@@ -76,6 +77,8 @@ class ContentLoader:
                 open=cont_data["open"],
                 contents=[ItemId(iid) for iid in cont_data.get("contents", [])]
             )
+        print(loc.name)
+        print(containers)
         loc.containers = containers
         raw_items = data.get("items", [])
         loc.items = [ItemId(iid) for iid in raw_items]
@@ -101,7 +104,8 @@ class ContentLoader:
         self.CHOICES[cid] = Choice(
             id=cid,
             text=data["text"],
-            description=data["description"],
+            result_text=data.get("result_text", None),
+            result_renderer=data.get("result_renderer", None),
             when=conditions,
             do=effects
         )

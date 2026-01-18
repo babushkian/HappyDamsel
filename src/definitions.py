@@ -93,9 +93,11 @@ Effect = Callable[["GameState"], None]
 class Choice:
     id: str
     text: str
-    description: str
     when: list[Condition] = field(default_factory=list)
     do: list[Effect] = field(default_factory=list)
+    result_text: str | None = None
+    result_renderer: Callable[["GameState"], str]| None = None
+
 
     def is_available(self, state: "GameState") -> bool:
         return all(cond(state) for cond in self.when)
@@ -105,7 +107,12 @@ class Choice:
             raise RuntimeError("Conditions not met")
         for effect in self.do:
             effect(state)
-        return self.description
+
+        if self.result_text is not None:
+            return self.result_text
+        if self.result_renderer is not None:
+            return self.result_renderer(state)
+        return ""
 
 
 @dataclass
