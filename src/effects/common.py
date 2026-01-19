@@ -17,7 +17,7 @@ def register_effect(name: str):
 def make_consume_item(data: dict):
     item = ItemId(data["item"])
 
-    def _effect(state: GameState):
+    def _effect(state: GameState, content: "GameContent"):
         state.inventory.remove(item)
 
     return _effect
@@ -26,7 +26,7 @@ def make_consume_item(data: dict):
 def make_unlock_and_open(data: dict) -> Effect:
     cid = ObjectId(data["container"])
 
-    def _effect(state: GameState) -> None:
+    def _effect(state: GameState, content: "GameContent") -> None:
         c = state.objects[cid]
         c.flags["locked"] = False
         c.flags["open"] = True
@@ -35,7 +35,7 @@ def make_unlock_and_open(data: dict) -> Effect:
 @register_effect("reveal_contents")
 def make_reveal_contents(data: dict) -> Effect:
     cid = ObjectId(data["container"])
-    def _effect(state: GameState) -> None:
+    def _effect(state: GameState, content: "GameContent") -> None:
         c = state.objects[cid]
         for item in c.items:
             state.inventory.add(item)
@@ -46,7 +46,7 @@ def make_reveal_contents(data: dict) -> Effect:
 def make_get_item(data: dict) -> Effect:
     iid = ItemId(data["item"])
 
-    def _effect(state: GameState) -> None:
+    def _effect(state: GameState, content: "GameContent") -> None:
         state.locations_items[state.current_location].remove(iid)
         state.inventory.add(iid)
     return _effect
@@ -55,7 +55,9 @@ def make_get_item(data: dict) -> Effect:
 @register_effect("move_to")
 def make_move_to(data: dict) -> Effect:
     lid = LocationId(data["location"])
-    def _effect(state: GameState) -> None:
-        state.move_to(lid)
+    def _effect(state: GameState, content: "GameContent") -> None:
+        if lid not in content.locations:
+            raise ValueError(f"Location {lid} does not exist")
+        state.current_location = lid
     return _effect
 

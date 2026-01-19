@@ -25,7 +25,15 @@ class FurnitureDef:
     can_lock: bool = False
     is_container: bool = False
     is_transparent: bool = False
+    turnable: bool = False
 
+
+@dataclass(frozen=True)
+class ExitDef:
+    target: LocationId
+    text: str                     # "Пойти на кухню"
+    when: list["Condition"] = field(default_factory=list)
+    do: list["Effect"] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -35,22 +43,12 @@ class LocationDef:
     description: str
     objects: list[ObjectId]
     items: list[ItemId]
+    # exits: list[ExitDef]
 
 @dataclass
 class ObjectState:
     flags: dict[str, bool] = field(default_factory=dict)
     items: list[ItemId] = field(default_factory=list)
-
-
-
-@dataclass
-class Container:
-    id: ObjectId
-    name: str
-    description: str
-    locked: bool
-    open: bool
-    contents: list[ItemId]
 
 
 
@@ -73,8 +71,8 @@ class Inventory:
             self.items[item] -= qty
 
 
-Condition = Callable[["GameState"], bool]
-Effect = Callable[["GameState"], None]
+Condition = Callable[["GameState", "GameContent"], bool]
+Effect = Callable[["GameState", "GameContent"], None]
 
 
 @dataclass
@@ -86,15 +84,14 @@ class Choice:
     result_text: str | None = None
     result_renderer: Callable[["GameState"], str]| None = None
 
+    def is_available(self, state: "GameState", content: "GameContent") -> bool:
+        return all(cond(state, content) for cond in self.when)
 
-    def is_available(self, state: "GameState") -> bool:
-        return all(cond(state) for cond in self.when)
-
-    def apply(self, state: "GameState") -> str:
-        if not self.is_available(state):
+    def apply(self, state: "GameState", content: "GameContent") -> str:
+        if not self.is_available(state, content):
             raise RuntimeError("Conditions not met")
         for effect in self.do:
-            effect(state)
+            effect(state, content)
 
         if self.result_text is not None:
             return self.result_text

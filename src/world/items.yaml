@@ -33,3 +33,8 @@ needle:
   name: "Иголка"
   description: "Толстая сапожная иголка с широким ушком."
   consumable: false
+
+chisel:
+  name: "Стаместка"
+  description: "Стаместка с деревянной ручкой. Полотно покрыто ржавчиной, но лезвие остро заточено."
+  consumable: false

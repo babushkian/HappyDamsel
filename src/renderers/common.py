@@ -14,7 +14,7 @@ def register_renderer(name: str):
 
 @register_renderer("open_container")
 def open_container_template(
-        furn: FurnitureDef,
+    furn: FurnitureDef,
     item: ItemDef | None = None,
 ) -> Callable[[GameState], str]:
 

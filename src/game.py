@@ -94,7 +94,7 @@ class Game:
     def get_available_choices(self) -> list[Choice]:
         choices: list[Choice] = []
         for c in self.content.choices.values():
-            if c.is_available(self.state):
+            if c.is_available(self.state, self.content):
                 choices.append(c)
         choices.extend(self.generate_pickup_choices_for_location())
         return choices
@@ -124,7 +124,7 @@ class Game:
             if  option not in available_options:
                 print("Неверная опция!")
                 continue
-            action_description = associations[option].apply(self.state)
+            action_description = associations[option].apply(self.state, self.content)
             print(action_description)
             break
 

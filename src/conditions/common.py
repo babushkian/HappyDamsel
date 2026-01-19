@@ -16,7 +16,7 @@ def register_condition(name: str):
 @register_condition("has_item")
 def has_item(data: dict) -> Condition:
     item = ItemId(data["item"])
-    def _cond(state: GameState) -> bool:
+    def _cond(state: GameState, content: "GameContent") -> bool:
         return state.inventory.has(item)
     return _cond
 
@@ -24,7 +24,7 @@ def has_item(data: dict) -> Condition:
 def container_locked(data: dict) -> Condition:
     cid = ObjectId(data["container"])
 
-    def _cond(state: GameState) -> bool:
+    def _cond(state: GameState, content: "GameContent") -> bool:
         try:
             return state.objects[cid].flags["locked"]
         except ValueError:
@@ -34,6 +34,6 @@ def container_locked(data: dict) -> Condition:
 @register_condition("in_location")
 def entity_in_location(data: dict) -> Condition:
     lid = LocationId(data["location"])
-    def _cond(state: GameState) -> bool:
+    def _cond(state: GameState, content: "GameContent") -> bool:
         return state.current_location == lid
     return _cond

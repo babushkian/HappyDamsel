@@ -44,5 +44,25 @@ hall:
       open: false
       contents:
         - note # записку нельзя прочитать в коридоре, надо выбраться в более светлое место.
+    switch:
+        kind: "switch"
+        name: "Выключатель"
+        description: "Рядом с дверью в кладовку расположен выключатель."
+        turnable: true
+        turned_on: false
+
   items:
     - pink_key
+
+closet:
+  name: "Кладовка"
+  description: "Темная тесная пыльная кладовка."
+  furniture:
+    rack:
+      kind: "container"
+      name: "Стеллаж"
+      description: "Металлический стеллаж, заваленный всяким барахлом."
+
+      is_container: true
+      contents:
+        - chisel

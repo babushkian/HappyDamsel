@@ -7,6 +7,8 @@ choices:
         item: rusty_key
       - type: container_locked
         container: wooden_box
+      - type: in_location
+        location: attic
     effects:
       - type: consume_item
         item: rusty_key
@@ -28,6 +30,8 @@ choices:
         item: pink_key
       - type: container_locked
         container: pink_box
+      - type: in_location
+        location: attic
     effects:
       - type: consume_item
         item: pink_key
@@ -55,3 +59,23 @@ choices:
     effects:
       - type: move_to
         location: attic
+
+  go_to_closet:
+    text: "Зайти в кладовку"
+    result_text: "Ты  вошел в кладовку."
+    conditions:
+      - type: in_location
+        location: hall
+    effects:
+      - type: move_to
+        location: closet
+
+  go_out_from_closet:
+    text: "Выйти из кладовки"
+    result_text: "Ты  вернулся в прихожую."
+    conditions:
+      - type: in_location
+        location: closet
+    effects:
+      - type: move_to
+        location: hall
