@@ -45,11 +45,21 @@ hall:
       contents:
         - note # записку нельзя прочитать в коридоре, надо выбраться в более светлое место.
     switch:
-        kind: "switch"
-        name: "Выключатель"
-        description: "Рядом с дверью в кладовку расположен выключатель."
-        turnable: true
-        turned_on: false
+      kind: "switch"
+      name: "Выключатель"
+      description: "Рядом с дверью в кладовку расположен выключатель."
+      turnable: true
+      turned_on: false
+
+    closet_door:
+      kind: "door"
+      name: "Дверь в кладовку"
+      description: "Хлипкая дверь, выкрашенная светлой краской. Без замка, с простенькой железной ручкой."
+      can_open: true
+      can_lock: false
+      is_container: false
+      locked: false
+      open: false
 
   items:
     - pink_key

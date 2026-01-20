@@ -13,6 +13,8 @@ for c in content.choices.values():
     print(c)
 del cl
 
+for f in content.furniture.values():
+    print(f)
 # состояние игры
 
 
@@ -31,6 +33,7 @@ class GameRenderer:
         description += "\n"
 
         furniture = location.objects
+        print(furniture)
         for fid in furniture:
             furn_def = self.content.furniture[fid]
             if furn_def.kind == "container":
@@ -42,6 +45,12 @@ class GameRenderer:
                 else:
                     description +=f"{furn_def.name} {status}"
                 description += "\n"
+            if furn_def.kind == "door":
+                status = "(закрыто)" if not self.state.objects[fid].flags["open"] else "(открыто)"
+                description += f"{furn_def.name}{status}. {furn_def.description}'\n"
+            if furn_def.kind == "switch":
+                status = "(включено)" if self.state.objects[fid].flags["turned_on"] else "(выключено)"
+                description += f"{furn_def.name}{status}. {furn_def.description}\n"
 
         item_names: list[str] = []
         for iid in self.state.locations_items[self.state.current_location]:

@@ -40,6 +40,20 @@ choices:
       - type: reveal_contents
         container: pink_box
 
+
+  open_closet_door:
+    text: "Открыть дверь в кладовку"
+    description: "Ты потянул за ручку. Дверь на удивление легко открылась."
+    conditions:
+      - type: in_location
+        location: hall
+      - type: object_is_closed
+        object: closet_door
+    effects:
+      - type: open_object
+        object: closet_door
+
+
   go_down_to_hall:
     text: "Спуститься вниз"
     result_text: "Ты спустился в прихожую."
@@ -66,6 +80,8 @@ choices:
     conditions:
       - type: in_location
         location: hall
+      - type: object_is_open
+        object: closet_door
     effects:
       - type: move_to
         location: closet

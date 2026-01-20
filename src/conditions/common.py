@@ -31,9 +31,38 @@ def container_locked(data: dict) -> Condition:
             return False
     return _cond
 
+
 @register_condition("in_location")
 def entity_in_location(data: dict) -> Condition:
     lid = LocationId(data["location"])
     def _cond(state: GameState, content: "GameContent") -> bool:
         return state.current_location == lid
     return _cond
+
+
+@register_condition("object_is_open")
+def object_is_open(data: dict) -> Condition:
+    oid = ObjectId(data["object"])
+    def _cond(state: GameState, content: "GameContent") -> bool:
+        o = state.objects.get(oid)
+        if o is None:
+            raise ValueError(f"Object {oid} does not exist")
+        odef = content.furniture.get(oid)
+        if not odef.can_open:
+            raise ValueError(f"Object {oid} is not openable")
+        return o.flags.get("open", False)
+    return _cond
+
+@register_condition("object_is_closed")
+def object_is_closed(data: dict) -> Condition:
+    oid = ObjectId(data["object"])
+    def _cond(state: GameState, content: "GameContent") -> bool:
+        o = state.objects.get(oid)
+        if o is None:
+            raise ValueError(f"Object {oid} does not exist")
+        odef = content.furniture.get(oid)
+        if not odef.can_open:
+            raise ValueError(f"Object {oid} is not openable")
+        return not o.flags.get("open", True)
+    return _cond
+

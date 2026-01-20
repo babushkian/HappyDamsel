@@ -90,10 +90,15 @@ class ContentLoader:
                 can_lock=furn_data.get("can_lock", False),
                 can_open=furn_data.get("can_open", False),
                 is_transparent=furn_data.get("is_transparent", False),
+                turnable=furn_data.get("turnable", False)
             )
             objects.append(obj_id)
             self.object_states[obj_id] = ObjectState(
-                    flags={"locked": furn_data.get("locked", False), "open": furn_data.get("open", True)},
+                    flags={
+                        "locked": furn_data.get("locked", False),
+                        "open": furn_data.get("open", True),
+                        "turned_on": furn_data.get("turned_on", False),
+                    },
                     items=[ItemId(iid) for iid in furn_data.get("contents", [])],
             )
         loc = LocationDef(

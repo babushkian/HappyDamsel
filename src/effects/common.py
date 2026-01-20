@@ -32,6 +32,7 @@ def make_unlock_and_open(data: dict) -> Effect:
         c.flags["open"] = True
     return _effect
 
+
 @register_effect("reveal_contents")
 def make_reveal_contents(data: dict) -> Effect:
     cid = ObjectId(data["container"])
@@ -41,6 +42,7 @@ def make_reveal_contents(data: dict) -> Effect:
             state.inventory.add(item)
         c.items.clear()
     return _effect
+
 
 @register_effect("get_item")
 def make_get_item(data: dict) -> Effect:
@@ -61,3 +63,14 @@ def make_move_to(data: dict) -> Effect:
         state.current_location = lid
     return _effect
 
+
+@register_effect("open_object")
+def make_open_object(data: dict) -> Effect:
+    oid = ObjectId(data["object"])
+    def _effect(state: GameState, content: "GameContent") -> None:
+        odef = content.furniture.get(oid)
+        if not odef.can_open:
+            raise ValueError(f"Object {oid} is not openable")
+        o = state.objects[oid]
+        o.flags["open"] = True
+    return _effect
