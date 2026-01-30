@@ -4,8 +4,7 @@ from effects import EFFECTS
 from content_parts import GameContent
 from init_content import ContentLoader
 from loaders import YamlLoader
-from definitions import  LocationId, GameState, Choice
-
+from definitions import LocationId, GameState, Choice, Result
 
 cl = ContentLoader(YamlLoader)
 content, state = cl.init_content()
@@ -117,7 +116,7 @@ class Game:
                 Choice(
                     id=f"pick_up_{iid}",
                     text=f"Взять {item.name}",
-                    result_text =f"Ты взял {item.name}",
+                    result = Result("generic_pickup",{"item": iid} ),
                     do=[EFFECTS["get_item"]({"item": iid})]
                 )
             )

@@ -9,7 +9,7 @@ from definitions import (ItemId,
                          Condition,
                          Effect,
                          Inventory, ItemDef, LocationDef, FurnitureDef,
-                         GameState, ObjectState
+                         GameState, ObjectState, Result
                          )
 
 
@@ -130,11 +130,19 @@ class ContentLoader:
         effects: list[Effect] = []
         for e in data.get("effects", []):
             effects.append( EFFECTS[e["type"]](e))
+        result = None
+        if data.get("result"):
+            print(data.get("result"))
+            result = Result(
+                template=data["result"]["template"],
+                params=data["result"].get("params", {})
+            )
+
         self.CHOICES[cid] = Choice(
             id=cid,
             text=data["text"],
             result_text=data.get("result_text", None),
-            result_renderer=data.get("result_renderer", None),
+            result=result,
             when=conditions,
             do=effects
         )

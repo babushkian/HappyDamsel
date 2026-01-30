@@ -16,11 +16,11 @@ choices:
         container: wooden_box
       - type: reveal_contents
         container: wooden_box
-    result_renderer:
-      - type: open_container
-        params:
-          container: wooden_box
-          item: rusty_key
+    result:
+      template: generic_unlock
+      params:
+        object: wooden_box
+        item: rusty_key
 
   open_pink_box:
     text: "Открыть розовую шкатулку"

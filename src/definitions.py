@@ -1,6 +1,7 @@
 from typing import Callable, Self, NewType
 from dataclasses import dataclass, field
 
+from renderers import render_template
 
 ItemId = NewType("ItemId", str)
 ObjectId = NewType("ObjectId", str)
@@ -74,6 +75,10 @@ class Inventory:
 Condition = Callable[["GameState", "GameContent"], bool]
 Effect = Callable[["GameState", "GameContent"], None]
 
+@dataclass
+class Result:
+    template: str
+    params: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class Choice:
@@ -82,7 +87,7 @@ class Choice:
     when: list[Condition] = field(default_factory=list)
     do: list[Effect] = field(default_factory=list)
     result_text: str | None = None
-    result_renderer: Callable[["GameState"], str]| None = None
+    result: Result | None = None
 
     def is_available(self, state: "GameState", content: "GameContent") -> bool:
         return all(cond(state, content) for cond in self.when)
@@ -95,8 +100,8 @@ class Choice:
 
         if self.result_text is not None:
             return self.result_text
-        if self.result_renderer is not None:
-            return self.result_renderer(state)
+        if self.result is not None:
+            return render_template(self.result, content)
         return ""
 
 

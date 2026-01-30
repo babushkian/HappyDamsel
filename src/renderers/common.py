@@ -1,27 +1,24 @@
-from typing import Callable
-from definitions import GameState,  ItemDef, Condition, FurnitureDef
-
-Renderer = Callable[[GameState], str]
-RenderFactory = Callable[[dict], Condition]
-RENDERERS: dict[str, RenderFactory] = {}
 
 
-def register_renderer(name: str):
-    def decorator(fn: RenderFactory):
-        RENDERERS[name] = fn
-        return fn
-    return decorator
+TEMPLATES = {
+    "generic_unlock": "Ты открыл {object} с помощью {item}.",
+    "generic_pickup": "Ты подобрал {item}.",
+    "generic_drop": "Ты выбросил {item}.",
+    "generic_open": "Ты открыл {object}.",
+    "generic_close": "Ты закрыл {object}."
+}
 
-@register_renderer("open_container")
-def open_container_template(
-    furn: FurnitureDef,
-    item: ItemDef | None = None,
-) -> Callable[[GameState], str]:
+def render_template(result: "Result", content: "GameContent"):
+    if result.template not in TEMPLATES:
+        raise ValueError(f"Не обнаружен шаблон для {result.template!r}")
+    resolved = {}
+    for key, value in result.params.items():
+        if value in content.items:
+            resolved[key] = content.items[value].name
+        elif value in content.furniture:
+            resolved[key] = content.furniture[value].name
+        else:
+            resolved[key] = value
 
-    def render(_: GameState) -> str:
-        if item:
-            return (
-                f"Вы открыли {furn.name} с помощью {item.name}."
-            )
-        return f"Вы открыли {furn.name}."
-    return render
+    return TEMPLATES[result.template].format(**resolved)
+
