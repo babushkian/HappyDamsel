@@ -5,6 +5,8 @@ from content_parts import GameContent
 from init_content import ContentLoader
 from loaders import YamlLoader
 from definitions import LocationId, GameState, Choice, Result
+from choices import GenericChoices
+
 
 cl = ContentLoader(YamlLoader)
 content, state = cl.init_content()
@@ -16,6 +18,7 @@ for f in content.furniture.values():
     print(f)
 # состояние игры
 
+gc = GenericChoices(state, content)
 
 @dataclass
 class GameRenderer:
@@ -104,24 +107,12 @@ class Game:
         for c in self.content.choices.values():
             if c.is_available(self.state, self.content):
                 choices.append(c)
-        choices.extend(self.generate_pickup_choices_for_location())
+        choices.extend(gc.pickup())
+        choices.extend(gc.open())
         return choices
 
 
-    def generate_pickup_choices_for_location(self) -> list[Choice]:
-        pickup_options: list[Choice] = []
-        for iid in self.state.locations_items[self.state.current_location]:
-            item = self.content.items[iid]
-            pickup_options.append(
-                Choice(
-                    id=f"pick_up_{iid}",
-                    text=f"Взять {item.name}",
-                    result = Result("generic_pickup",{"item": iid} ),
-                    do=[EFFECTS["get_item"]({"item": iid})]
-                )
-            )
 
-        return sorted(pickup_options, key=lambda i: i.text)
 
 
     def process(self, associations: dict[str, Choice]):
