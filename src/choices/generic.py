@@ -40,3 +40,19 @@ class GenericChoices:
                    )
         return choices
 
+    def close(self) -> list[Choice]:
+        choices: list[Choice] = []
+        for fid in self.content.locations[self.state.current_location].objects:
+            furniture = self.content.furniture[fid]
+            if furniture.can_open:
+                if self.state.objects[fid].flags["open"]  and not self.state.objects[fid].flags["locked"]:
+                   choices.append(
+                       Choice(
+                           id=f"close_{fid}",
+                           text=f"Закрыть {furniture.name}",
+                           result=Result("generic_close", {"object": fid}),
+                           do=[EFFECTS["close_object"]({"object": fid})]
+
+                       )
+                   )
+        return choices

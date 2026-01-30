@@ -74,3 +74,14 @@ def make_open_object(data: dict) -> Effect:
         o = state.objects[oid]
         o.flags["open"] = True
     return _effect
+
+@register_effect("close_object")
+def make_close_object(data: dict) -> Effect:
+    oid = ObjectId(data["object"])
+    def _effect(state: GameState, content: "GameContent") -> None:
+        odef = content.furniture.get(oid)
+        if not odef.can_open:
+            raise ValueError(f"Object {oid} is not openable")
+        o = state.objects[oid]
+        o.flags["open"] = False
+    return _effect

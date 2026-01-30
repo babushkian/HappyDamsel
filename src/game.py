@@ -109,6 +109,7 @@ class Game:
                 choices.append(c)
         choices.extend(gc.pickup())
         choices.extend(gc.open())
+        choices.extend(gc.close())
         return choices
 
 
