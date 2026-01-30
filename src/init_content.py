@@ -90,7 +90,8 @@ class ContentLoader:
                 can_lock=furn_data.get("can_lock", False),
                 can_open=furn_data.get("can_open", False),
                 is_transparent=furn_data.get("is_transparent", False),
-                turnable=furn_data.get("turnable", False)
+                turnable=furn_data.get("turnable", False),
+                link_to=furn_data.get("link_to", None),
             )
             objects.append(obj_id)
             self.object_states[obj_id] = ObjectState(

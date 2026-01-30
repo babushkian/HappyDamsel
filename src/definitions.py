@@ -27,6 +27,7 @@ class FurnitureDef:
     is_container: bool = False
     is_transparent: bool = False
     turnable: bool = False
+    link_to: ObjectId | None = None
 
 
 @dataclass(frozen=True)

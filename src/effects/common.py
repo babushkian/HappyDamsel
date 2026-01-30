@@ -73,6 +73,9 @@ def make_open_object(data: dict) -> Effect:
             raise ValueError(f"Object {oid} is not openable")
         o = state.objects[oid]
         o.flags["open"] = True
+        if odef.kind == "door":
+            linked_obj = state.objects[odef.link_to]
+            linked_obj.flags["open"] = True
     return _effect
 
 @register_effect("close_object")
@@ -84,4 +87,7 @@ def make_close_object(data: dict) -> Effect:
             raise ValueError(f"Object {oid} is not openable")
         o = state.objects[oid]
         o.flags["open"] = False
+        if odef.kind == "door":
+            linked_obj = state.objects[odef.link_to]
+            linked_obj.flags["open"] = True
     return _effect
