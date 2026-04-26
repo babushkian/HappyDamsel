@@ -1,6 +1,5 @@
 from typing import Callable
-from definitions import GameState, ObjectId, ItemId, LocationId,  Effect
-
+from definitions import GameState, ObjectId, ItemId, LocationId, Effect, INVENTORY_LOCATION_ID
 
 EffectFactory = Callable[[dict], Effect]
 EFFECTS: dict[str, EffectFactory] = {}
@@ -18,7 +17,9 @@ def make_consume_item(data: dict):
     item = ItemId(data["item"])
 
     def _effect(state: GameState, content: "GameContent"):
-        state.inventory.remove(item)
+        inv_items = state.locations_items[INVENTORY_LOCATION_ID]
+        if item in inv_items:
+            inv_items.remove(item)
 
     return _effect
 
@@ -39,7 +40,7 @@ def make_reveal_contents(data: dict) -> Effect:
     def _effect(state: GameState, content: "GameContent") -> None:
         c = state.objects[cid]
         for item in c.items:
-            state.inventory.add(item)
+            state.locations_items[INVENTORY_LOCATION_ID].append(item)
         c.items.clear()
     return _effect
 
@@ -49,8 +50,22 @@ def make_get_item(data: dict) -> Effect:
     iid = ItemId(data["item"])
 
     def _effect(state: GameState, content: "GameContent") -> None:
-        state.locations_items[state.current_location].remove(iid)
-        state.inventory.add(iid)
+        loc_items = state.locations_items[INVENTORY_LOCATION_ID]
+        if iid in loc_items:
+            loc_items.remove(iid)
+        state.locations_items[INVENTORY_LOCATION_ID].append(iid)
+    return _effect
+
+
+@register_effect("drop_item")
+def make_drop_item(data: dict) -> Effect:
+    iid = ItemId(data["item"])
+    def _effect(state: GameState, content: "GameContent") -> None:
+        inv_items = state.locations_items[INVENTORY_LOCATION_ID]
+        if iid in inv_items:
+            inv_items.remove(iid)
+        state.locations_items[state.current_location].append(iid)
+
     return _effect
 
 

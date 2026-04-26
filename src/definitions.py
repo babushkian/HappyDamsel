@@ -1,11 +1,17 @@
-from typing import Callable, Self, NewType
+from typing import Callable, Self, NewType, TYPE_CHECKING
 from dataclasses import dataclass, field
 
 from renderers import render_template
 
+if TYPE_CHECKING:
+    from content_parts import GameContent
+
 ItemId = NewType("ItemId", str)
 ObjectId = NewType("ObjectId", str)
 LocationId = NewType("LocationId", str)
+
+
+INVENTORY_LOCATION_ID = LocationId("inventory")
 
 @dataclass(frozen=True)
 class ItemDef:
@@ -30,12 +36,16 @@ class FurnitureDef:
     link_to: ObjectId | None = None
 
 
+Condition = Callable[["GameState", "GameContent"], bool]
+Effect = Callable[["GameState", "GameContent"], None]
+
+
 @dataclass(frozen=True)
 class ExitDef:
     target: LocationId
     text: str                     # "Пойти на кухню"
-    when: list["Condition"] = field(default_factory=list)
-    do: list["Effect"] = field(default_factory=list)
+    when: list[Condition] = field(default_factory=list)
+    do: list[Effect] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -53,28 +63,6 @@ class ObjectState:
     items: list[ItemId] = field(default_factory=list)
 
 
-
-@dataclass
-class Inventory:
-    items: dict[ItemId, int]
-
-    def has(self, item: ItemId) -> bool:
-        return self.items.get(item, 0) > 0
-
-    def add(self, item: ItemId, qty: int = 1) -> None:
-        self.items[item] = self.items.get(item, 0) + qty
-
-    def remove(self, item: ItemId, qty: int = 1) -> None:
-        if self.items.get(item, 0) < qty:
-            raise ValueError("Item not in inventory")
-        if self.items[item] == qty:
-            del self.items[item]
-        else:
-            self.items[item] -= qty
-
-
-Condition = Callable[["GameState", "GameContent"], bool]
-Effect = Callable[["GameState", "GameContent"], None]
 
 @dataclass
 class Result:
@@ -109,20 +97,15 @@ class Choice:
 @dataclass
 class GameState:
     current_location: LocationId
-    inventory: Inventory
     return_location: LocationId | None = None
     locations_items: dict[LocationId, list[ItemId]] = field(default_factory=dict)
     objects: dict[ObjectId, ObjectState] = field(default_factory=dict)
     visited_locations: set[LocationId] = field(default_factory=set)
     flags: dict[str, bool] = field(default_factory=dict,)
 
-    def move_to(self, lid: LocationId) -> None:
-        if lid not in self.locations:
-            raise ValueError(f"Location {lid.value!r} does not exist")
-        self.current_location = lid
 
     def set_location_visited(self) -> None:
-        if self.current_location not in self.visied_locations:
-            self.visied_locations.add(self.current_location)
+        if self.current_location not in self.visited_locations:
+            self.visited_locations.add(self.current_location)
 
 

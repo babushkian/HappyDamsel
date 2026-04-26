@@ -1,5 +1,5 @@
 from typing import Callable
-from definitions import GameState, ObjectId, ItemId, LocationId, Condition
+from definitions import GameState, ObjectId, ItemId, LocationId, Condition, INVENTORY_LOCATION_ID
 
 
 ConditionFactory = Callable[[dict], Condition]
@@ -17,8 +17,9 @@ def register_condition(name: str):
 def has_item(data: dict) -> Condition:
     item = ItemId(data["item"])
     def _cond(state: GameState, content: "GameContent") -> bool:
-        return state.inventory.has(item)
+        return item in state.locations_items[INVENTORY_LOCATION_ID]
     return _cond
+
 
 @register_condition("container_locked")
 def container_locked(data: dict) -> Condition:

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from definitions import ItemId, LocationId, LocationDef, Inventory, Choice, ItemDef, FurnitureDef, ObjectId
+from definitions import ItemId, LocationId, LocationDef, Choice, ItemDef, FurnitureDef, ObjectId
 
 
 @dataclass(frozen=True)

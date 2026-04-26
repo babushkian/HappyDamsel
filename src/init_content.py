@@ -2,15 +2,16 @@ from content_parts import GameContent
 from loaders import Loader
 from conditions import CONDITIONS
 from effects import EFFECTS
-from definitions import (ItemId,
-                         LocationId,
-                         ObjectId,
-                         Choice,
-                         Condition,
-                         Effect,
-                         Inventory, ItemDef, LocationDef, FurnitureDef,
-                         GameState, ObjectState, Result
-                         )
+from definitions import (
+    ItemId,
+    LocationId,
+    ObjectId,
+    Choice,
+    Condition,
+    Effect,
+    ItemDef, LocationDef, FurnitureDef,
+    GameState, ObjectState, Result, INVENTORY_LOCATION_ID
+)
 
 
 
@@ -20,13 +21,13 @@ class ContentLoader:
     def __init__(self, loader: Loader) -> None:
         self.ITEMS: dict[ItemId, ItemDef] = {}
         self.LOCATIONS: dict[LocationId, LocationDef] = {}
-        self.INVENTORY = Inventory(items={})
         self.CHOICES: dict[str, Choice] = {}
         self.FURNITURE: dict[ObjectId, FurnitureDef] = {}
         self.raw_content = loader.load()
         self.object_states: dict[ObjectId, ObjectState] = {}
 
         self.location_items: dict[LocationId, list[ItemId]]= {}
+        self.location_items[INVENTORY_LOCATION_ID] = []
 
 
     def init_content(self) -> tuple[GameContent, GameState]:
@@ -53,7 +54,6 @@ class ContentLoader:
         )
         state = GameState(
             current_location=LocationId("attic"),
-            inventory=self.INVENTORY,
             locations_items=self.location_items,
             objects=self.object_states,
             flags={},
@@ -117,11 +117,9 @@ class ContentLoader:
 
 
     def build_inventory(self, data: list[dict]):
-        invtry: dict[ItemId, int] = {}
         for item in data:
             item_id = ItemId(item["item"])
-            invtry[item_id] = item["qty"]
-        self.INVENTORY.items = invtry
+            self.location_items[INVENTORY_LOCATION_ID].append(item_id)
 
 
     def build_choice(self, cid: str,  data: dict):
