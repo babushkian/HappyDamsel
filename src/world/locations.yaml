@@ -1,3 +1,10 @@
+inventory:
+  name: "Инвентарь"
+  description: ""
+  items:
+    - "rusty_key"
+
+
 attic:
   name: "Чердак"
   description: "Пыльный чердак со старой шкатулкой"

@@ -17,8 +17,6 @@ class YamlLoader(Loader):
             raw_item_data = yaml.safe_load(file.read())
         with (cls.CONTENT_DIR / "locations.yaml").open(mode="r", encoding="utf-8") as file:
             raw_location_data = yaml.safe_load(file.read())
-        with (cls.CONTENT_DIR / "inventory.yaml").open(mode="r", encoding="utf-8") as file:
-            raw_inventory_data = yaml.safe_load(file.read())
         with (cls.CONTENT_DIR / "choices.yaml").open(mode="r", encoding="utf-8") as file:
             yaml_choices = yaml.safe_load(file.read())
         raw_choices = {}
@@ -28,6 +26,5 @@ class YamlLoader(Loader):
         return RawContent(
             items=raw_item_data,
             locations=raw_location_data,
-            inventory=raw_inventory_data,
             choices=raw_choices
         )

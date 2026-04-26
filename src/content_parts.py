@@ -6,7 +6,6 @@ from definitions import ItemId, LocationId, LocationDef, Choice, ItemDef, Furnit
 class RawContent:
     items: dict = field(default_factory=dict)
     locations: dict= field(default_factory=dict)
-    inventory: dict = field(default_factory=dict)
     choices: dict = field(default_factory=dict)
 
 

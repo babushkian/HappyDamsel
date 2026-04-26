@@ -10,7 +10,7 @@ from definitions import (
     Condition,
     Effect,
     ItemDef, LocationDef, FurnitureDef,
-    GameState, ObjectState, Result, INVENTORY_LOCATION_ID
+    GameState, ObjectState, Result
 )
 
 
@@ -27,7 +27,6 @@ class ContentLoader:
         self.object_states: dict[ObjectId, ObjectState] = {}
 
         self.location_items: dict[LocationId, list[ItemId]]= {}
-        self.location_items[INVENTORY_LOCATION_ID] = []
 
 
     def init_content(self) -> tuple[GameContent, GameState]:
@@ -37,7 +36,6 @@ class ContentLoader:
         for lid, raw in self.raw_content.locations.items():
             self.build_location(lid, raw)
 
-        self.build_inventory(self.raw_content.inventory["items"])
 
         for cid, struct in self.raw_content.choices.items():
             print(struct)
@@ -109,17 +107,8 @@ class ContentLoader:
             objects=objects,
             items=self.location_items[location_id]
         )
-
-
-
         self.LOCATIONS[location_id] = loc
 
-
-
-    def build_inventory(self, data: list[dict]):
-        for item in data:
-            item_id = ItemId(item["item"])
-            self.location_items[INVENTORY_LOCATION_ID].append(item_id)
 
 
     def build_choice(self, cid: str,  data: dict):
