@@ -1,5 +1,5 @@
 from content_parts import GameContent
-from definitions import Choice, Result
+from definitions import Choice, Result, INVENTORY_LOCATION_ID
 from effects import EFFECTS
 from definitions import GameState
 from content_parts import GameContent
@@ -22,6 +22,21 @@ class GenericChoices:
                 )
             )
         return sorted(pickup_options, key=lambda i: i.text)
+
+    def drop(self) -> list[Choice]:
+        drop_options: list[Choice] = []
+        for iid in self.state.locations_items[INVENTORY_LOCATION_ID]:
+            item = self.content.items[iid]
+            drop_options.append(
+                Choice(
+                    id=f"drop_{iid}",
+                    text=f"Бросить {item.name}",
+                    result=Result("generic_drop", {"item": iid}),
+                    do=[EFFECTS["drop_item"]({"item": iid})]
+                )
+            )
+        return sorted(drop_options, key=lambda i: i.text)
+
 
     def open(self) -> list[Choice]:
         choices: list[Choice] = []

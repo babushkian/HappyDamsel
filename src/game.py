@@ -4,7 +4,7 @@ from effects import EFFECTS
 from content_parts import GameContent
 from init_content import ContentLoader
 from loaders import YamlLoader
-from definitions import LocationId, GameState, Choice, Result
+from definitions import LocationId, GameState, Choice, Result, INVENTORY_LOCATION_ID
 from choices import GenericChoices
 
 
@@ -59,6 +59,11 @@ class GameRenderer:
             item_names.append(self.content.items[iid].name)
         if item_names:
             description += f"Здесь находится: {"\n".join(item_names)}\n"
+        item_names: list[str] = []
+        for iid in self.state.locations_items[INVENTORY_LOCATION_ID]:
+            item_names.append(self.content.items[iid].name)
+        if item_names:
+            description += f"В инвентаре: {"\n".join(item_names)}\n"
         return description
 
 
@@ -110,6 +115,7 @@ class Game:
         choices.extend(gc.pickup())
         choices.extend(gc.open())
         choices.extend(gc.close())
+        choices.extend(gc.drop())
         return choices
 
 

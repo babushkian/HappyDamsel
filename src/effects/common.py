@@ -50,7 +50,7 @@ def make_get_item(data: dict) -> Effect:
     iid = ItemId(data["item"])
 
     def _effect(state: GameState, content: "GameContent") -> None:
-        loc_items = state.locations_items[INVENTORY_LOCATION_ID]
+        loc_items = state.locations_items[state.current_location]
         if iid in loc_items:
             loc_items.remove(iid)
         state.locations_items[INVENTORY_LOCATION_ID].append(iid)
