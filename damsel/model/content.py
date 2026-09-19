@@ -1,6 +1,12 @@
-from dataclasses import dataclass, field
-from damsel.model.types import ItemId, ObjectId, LocationId, Condition, Effect
+from __future__ import annotations
 
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+from damsel.model.types import Condition, Effect, ItemId, LocationId, ObjectId
+
+if TYPE_CHECKING:
+    from damsel.model import GameContent, GameState
 
 @dataclass(frozen=True)
 class ItemDef:
@@ -56,10 +62,10 @@ class Choice:
     result_text: str | None = None
     result: Result | None = None
 
-    def is_available(self, state: "GameState", content: "GameContent") -> bool:
+    def is_available(self, state: GameState, content: GameContent) -> bool:
         return all(cond(state, content) for cond in self.when)
 
-    def apply(self, state: "GameState", content: "GameContent") -> str:
+    def apply(self, state: GameState, content: GameContent) -> str:
         if not self.is_available(state, content):
             raise RuntimeError("Conditions not met")
         for effect in self.do:

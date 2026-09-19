@@ -1,9 +1,9 @@
+from __future__ import annotations
 from typing import Callable, TYPE_CHECKING
 from damsel.model.types import ItemId, ObjectId, LocationId, Condition, INVENTORY_LOCATION_ID
 
 if TYPE_CHECKING:
-    from damsel.model.state import GameState
-    from damsel.model.content import GameContent
+    from damsel.model import GameState, GameContent
 
 ConditionFactory = Callable[[dict], Condition]
 CONDITIONS: dict[str, ConditionFactory] = {}
@@ -19,7 +19,7 @@ def register_condition(name: str):
 @register_condition("has_item")
 def has_item(data: dict) -> Condition:
     item = ItemId(data["item"])
-    def _cond(state: "GameState", content: "GameContent") -> bool:
+    def _cond(state: GameState, content: GameContent) -> bool:
         return item in state.locations_items[INVENTORY_LOCATION_ID]
     return _cond
 
@@ -27,7 +27,7 @@ def has_item(data: dict) -> Condition:
 @register_condition("container_locked")
 def container_locked(data: dict) -> Condition:
     cid = ObjectId(data["container"])
-    def _cond(state: "GameState", content: "GameContent") -> bool:
+    def _cond(state: GameState, content: GameContent) -> bool:
         try:
             return state.objects[cid].flags["locked"]
         except (KeyError, ValueError):
@@ -38,7 +38,7 @@ def container_locked(data: dict) -> Condition:
 @register_condition("in_location")
 def in_location(data: dict) -> Condition:
     lid = LocationId(data["location"])
-    def _cond(state: "GameState", content: "GameContent") -> bool:
+    def _cond(state: GameState, content: GameContent) -> bool:
         return state.current_location == lid
     return _cond
 
@@ -46,7 +46,7 @@ def in_location(data: dict) -> Condition:
 @register_condition("object_is_open")
 def object_is_open(data: dict) -> Condition:
     oid = ObjectId(data["object"])
-    def _cond(state: "GameState", content: "GameContent") -> bool:
+    def _cond(state: GameState, content: GameContent) -> bool:
         o = state.objects.get(oid)
         if o is None:
             raise ValueError(f"Object {oid} does not exist")
@@ -60,7 +60,7 @@ def object_is_open(data: dict) -> Condition:
 @register_condition("object_is_closed")
 def object_is_closed(data: dict) -> Condition:
     oid = ObjectId(data["object"])
-    def _cond(state: "GameState", content: "GameContent") -> bool:
+    def _cond(state: GameState, content: GameContent) -> bool:
         o = state.objects.get(oid)
         if o is None:
             raise ValueError(f"Object {oid} does not exist")
