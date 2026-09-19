@@ -1,0 +1,6 @@
+name: "Кладовка"
+description: "Темная тесная пыльная кладовка."
+objects:
+  - rack
+  - closet_closet_door
+items: []

@@ -1,0 +1,8 @@
+name: "Чердак"
+description: "Пыльный чердак со старой шкатулкой"
+objects:
+  - wooden_box
+  - pink_box
+items:
+  - hammer
+  - nail

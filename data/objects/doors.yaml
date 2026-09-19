@@ -1,0 +1,21 @@
+hall_closet_door:
+  kind: "door"
+  name: "Дверь в кладовку"
+  description: "Хлипкая дверь, выкрашенная светлой краской. Без замка, с простенькой железной ручкой."
+  can_open: true
+  can_lock: false
+  is_container: false
+  locked: false
+  open: false
+  link_to: closet_closet_door
+
+closet_closet_door:
+  kind: "door"
+  name: "Дверь в кладовку"
+  description: "Хлипкая дверь, выкрашенная светлой краской. Без замка, с простенькой железной ручкой."
+  can_open: true
+  can_lock: false
+  is_container: false
+  locked: false
+  open: false
+  link_to: hall_closet_door
