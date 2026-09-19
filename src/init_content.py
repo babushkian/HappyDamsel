@@ -38,12 +38,8 @@ class ContentLoader:
 
 
         for cid, struct in self.raw_content.choices.items():
-            print(struct)
             self.build_choice(cid, struct)
 
-
-        print(self.location_items)
-        print(self.object_states)
         content = GameContent(
             items=self.ITEMS,
             furniture=self.FURNITURE,
@@ -120,7 +116,6 @@ class ContentLoader:
             effects.append( EFFECTS[e["type"]](e))
         result = None
         if data.get("result"):
-            print(data.get("result"))
             result = Result(
                 template=data["result"]["template"],
                 params=data["result"].get("params", {})
