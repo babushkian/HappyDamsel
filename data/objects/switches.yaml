@@ -1,0 +1,11 @@
+switch:
+  kind: "switch"
+  name: "Выключатель"
+  description: "Рядом с дверью в кладовку расположен выключатель."
+  turnable: true
+  turned_on: false
+  can_open: false
+  can_lock: false
+  is_container: false
+  open: false
+  locked: false

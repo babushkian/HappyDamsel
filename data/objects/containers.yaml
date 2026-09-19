@@ -1,0 +1,47 @@
+wooden_box:
+  kind: "container"
+  name: "Шкатулка"
+  description: "На столе стоит старая деревянная шкатулка со ржавым замком."
+  can_open: true
+  can_lock: true
+  is_container: true
+  locked: true
+  open: false
+  contents:
+    - gold_ring
+
+pink_box:
+  kind: "container"
+  name: "Розовая шкатулка"
+  description: "На досках стоит маленькая шкатулка из темного дерева с розовыми прожилками."
+  can_open: true
+  can_lock: true
+  is_container: true
+  locked: true
+  open: false
+  contents:
+    - needle
+
+iron_chest:
+  kind: "container"
+  name: "Сундук"
+  description: "В углу стоит окованный металлическими полосами сундук."
+  can_open: true
+  can_lock: true
+  is_container: true
+  locked: false
+  open: false
+  contents:
+    - note
+
+rack:
+  kind: "container"
+  name: "Стеллаж"
+  description: "Металлический стеллаж, заваленный всяким барахлом."
+  is_container: true
+  can_open: false
+  can_lock: false
+  open: true
+  locked: false
+  contents:
+    - chisel

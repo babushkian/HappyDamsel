@@ -1,0 +1,100 @@
+choices:
+  open_box:
+    text: "Открыть шкатулку"
+    result_text   : "Ты вставил в замочную щель шкатулки ржавый ключ.  Попытался провернуть его, но ключ тут де заклинило. Ты нажал посильнее, замок поддался, но щелк! и у тебя в руке остался ржавый обломок ключа. Ты отбросил его и занялся содержимым шкатулки. Что тут у нас? Золотое кольцо! Так, это мы забираем!"
+    conditions:
+      - type: has_item
+        item: rusty_key
+      - type: container_locked
+        container: wooden_box
+      - type: in_location
+        location: attic
+    effects:
+      - type: consume_item
+        item: rusty_key
+      - type: unlock_container
+        container: wooden_box
+      - type: reveal_contents
+        container: wooden_box
+#    result:
+#      template: generic_unlock
+#      params:
+#        object: wooden_box
+#        item: rusty_key
+
+  open_pink_box:
+    text: "Открыть розовую шкатулку"
+    result_text: "Ты вставляешь в шкатулку розовый ключ, ее на мгновение озаряет розовое пламя, и она открывается. Ты обнаруживаешь на дне шкатулки крупную иголку и забираешь ее."
+    conditions:
+      - type: has_item
+        item: pink_key
+      - type: container_locked
+        container: pink_box
+      - type: in_location
+        location: attic
+    effects:
+      - type: consume_item
+        item: pink_key
+      - type: unlock_container
+        container: pink_box
+      - type: reveal_contents
+        container: pink_box
+
+
+#  open_closet_door:
+#    text: "Открыть дверь в кладовку"
+#    description: "Ты потянул за ручку. Дверь на удивление легко открылась."
+#    conditions:
+#      - type: in_location
+#        location: hall
+#      - type: object_is_closed
+#        object: closet_door
+#    effects:
+#      - type: open_object
+#        object: closet_door
+
+
+  from_attic_to_hall:
+    text: "Спуститься вниз"
+    result_text: "Ты спустился в прихожую."
+    conditions:
+      - type: in_location
+        location: attic
+    effects:
+      - type: move_to
+        location: hall
+
+  from_hall_to_attic:
+    text: "Подняться на чердак"
+    result_text: "Ты поднялся по деревянной лестнице на чердак."
+    conditions:
+      - type: in_location
+        location: hall
+    effects:
+      - type: move_to
+        location: attic
+
+  from_hall_to_closet:
+    text: "Зайти в кладовку"
+    result_text: "Ты  вошел в кладовку."
+    conditions:
+      - type: in_location
+        location: hall
+      - type: object_is_open
+        object: hall_closet_door
+    effects:
+      - type: move_to
+        location: closet
+
+  from_closet_to_hall:
+    text: "Выйти из кладовки"
+    result_text: "Ты  вернулся в прихожую."
+    conditions:
+      - type: in_location
+        location: closet
+      - type: object_is_open
+        object: closet_closet_door
+
+    effects:
+      - type: move_to
+        location: hall

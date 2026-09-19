@@ -17,6 +17,9 @@ dev = [
     "types-pyyaml>=6.0.12.20250915",
 ]
 
+[project.scripts]
+happydamsel = "damsel.game:main"
+
 [tool.mypy]
 python_version = "3.13"
 strict = false
