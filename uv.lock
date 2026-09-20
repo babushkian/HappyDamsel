@@ -22,6 +22,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
+    { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
     { name = "types-pyyaml" },
@@ -33,6 +34,7 @@ requires-dist = [{ name = "pyyaml", specifier = ">=6.0.3" }]
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = ">=1.19.1" },
+    { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
     { name = "ruff", specifier = ">=0.14.10" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20250915" },

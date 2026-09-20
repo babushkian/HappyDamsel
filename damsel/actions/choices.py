@@ -25,11 +25,6 @@ class GenericChoices:
 
         # Навигация
         choices.append(self._make_ui_choice("Заглянуть в инвентарь", "ui_inventory"))
-        # опция ничего не делает, так как ни на чем не сфокусирована
-        # нужно так же проходиться циклом по предметам, лежащим на полу
-        choices.append(
-            self._make_ui_choice("Взаимодействовать с предметом", "ui_interact_placeholder")
-        )
         # Генерируем фокус-опции для объектов
         for fid in self.content.locations[self.state.current_location].objects:
             furn = self.content.furniture[fid]
@@ -65,12 +60,6 @@ class GenericChoices:
         )
         # Выбросить
         choices.extend(self.drop_for_item(item_id))
-        # статические выборы для предметов в инвентаре
-        for c in self.content.choices.values():
-            if c.is_available(self.state, self.content) and any(
-                "has item" in str(e) for e in c.do
-            ):
-                choices.append(c)
         choices.append(self._make_ui_choice("Назад.", "ui_back"))
         return choices
 
@@ -152,20 +141,6 @@ class GenericChoices:
                     text=f"Взять {item.name}",
                     result=Result("generic_pickup", {"item": iid}),
                     do=[EFFECTS["get_item"]({"item": iid})],
-                )
-            )
-        return sorted(options, key=lambda c: c.text)
-
-    def drop(self) -> list[Choice]:
-        options = []
-        for iid in self.state.locations_items[INVENTORY_LOCATION_ID]:
-            item = self.content.items[iid]
-            options.append(
-                Choice(
-                    id=f"drop_{iid}",
-                    text=f"Выбросить {item.name}",
-                    result=Result("generic_drop", {"item": iid}),
-                    do=[EFFECTS["drop_item"]({"item": iid})],
                 )
             )
         return sorted(options, key=lambda c: c.text)

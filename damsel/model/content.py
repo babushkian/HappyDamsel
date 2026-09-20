@@ -38,14 +38,6 @@ class FurnitureDef:
 
 
 @dataclass(frozen=True)
-class ExitDef:
-    target: LocationId
-    text: str
-    when: list[Condition] = field(default_factory=list)
-    do: list[Effect] = field(default_factory=list)
-
-
-@dataclass(frozen=True)
 class LocationDef:
     id: LocationId
     name: str
