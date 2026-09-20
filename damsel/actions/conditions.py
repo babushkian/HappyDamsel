@@ -28,10 +28,8 @@ def has_item(data: dict) -> Condition:
 def container_locked(data: dict) -> Condition:
     cid = ObjectId(data["container"])
     def _cond(state: GameState, content: GameContent) -> bool:
-        try:
-            return state.objects[cid].flags["locked"]
-        except (KeyError, ValueError):
-            return False
+        obj = state.objects.get(cid)
+        return obj.is_locked if obj is not None else False
     return _cond
 
 
@@ -51,9 +49,9 @@ def object_is_open(data: dict) -> Condition:
         if o is None:
             raise ValueError(f"Object {oid} does not exist")
         odef = content.furniture.get(oid)
-        if not odef.can_open:
+        if odef is None or not odef.can_open:
             raise ValueError(f"Object {oid} is not openable")
-        return o.flags.get("open", False)
+        return o.is_open
     return _cond
 
 
@@ -65,7 +63,7 @@ def object_is_closed(data: dict) -> Condition:
         if o is None:
             raise ValueError(f"Object {oid} does not exist")
         odef = content.furniture.get(oid)
-        if not odef.can_open:
+        if odef is None or not odef.can_open:
             raise ValueError(f"Object {oid} is not openable")
-        return not o.flags.get("open", True)
+        return not o.is_open
     return _cond

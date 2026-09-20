@@ -74,7 +74,7 @@ class GenericChoices:
         choices.extend(self.close_for_object(obj_id))
 
         # вынуть предметы из контейнера
-        if furn.is_container and self.state.objects[obj_id].flags.get("open"):
+        if furn.is_container and self.state.objects[obj_id].is_open:
             for item_id in self.state.objects[obj_id].items:
                 choices.append(
                     Choice(
@@ -104,7 +104,7 @@ class GenericChoices:
         if not furn.can_open:
             return []
         obj = self.state.objects[fid]
-        if obj.flags["open"] or obj.flags["locked"]:
+        if obj.is_open or obj.is_locked:
             return []
         return [
             Choice(
@@ -120,7 +120,7 @@ class GenericChoices:
         if not furn.can_open:
             return []
         obj = self.state.objects[fid]
-        if not obj.flags["open"] or obj.flags["locked"]:
+        if not obj.is_open or obj.is_locked:
             return []
         return [
             Choice(
@@ -150,7 +150,7 @@ class GenericChoices:
         for fid in self.content.locations[self.state.current_location].objects:
             furn = self.content.furniture[fid]
             obj = self.state.objects[fid]
-            if furn.can_open and not obj.flags["open"] and not obj.flags["locked"]:
+            if furn.can_open and not obj.is_open and not obj.is_locked:
                 options.append(
                     Choice(
                         id=f"open_{fid}",
@@ -166,7 +166,7 @@ class GenericChoices:
         for fid in self.content.locations[self.state.current_location].objects:
             furn = self.content.furniture[fid]
             obj = self.state.objects[fid]
-            if furn.can_open and obj.flags["open"] and not obj.flags["locked"]:
+            if furn.can_open and obj.is_open and not obj.is_locked:
                 options.append(
                     Choice(
                         id=f"close_{fid}",

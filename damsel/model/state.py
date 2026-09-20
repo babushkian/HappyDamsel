@@ -4,7 +4,9 @@ from damsel.model.types import ItemId, ObjectId, LocationId
 
 @dataclass
 class ObjectState:
-    flags: dict[str, bool] = field(default_factory=dict)
+    is_open: bool = False
+    is_locked: bool = False
+    is_on: bool = False
     items: list[ItemId] = field(default_factory=list)
 
 

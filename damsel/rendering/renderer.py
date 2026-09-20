@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from damsel.model.content import Choice, GameContent
+from damsel.model.content import Choice, GameContent, ObjectKind
 from damsel.model.state import GameState
 from damsel.model.types import INVENTORY_LOCATION_ID
 
@@ -16,17 +16,17 @@ class GameRenderer:
         for fid in location.objects:
             furn = self.content.furniture[fid]
             obj = self.state.objects[fid]
-            if furn.kind == "container":
-                status = "(заперто)" if obj.flags["locked"] else ("(закрыто)" if not obj.flags["open"] else "")
+            if furn.kind is ObjectKind.CONTAINER:
+                status = "(заперто)" if obj.is_locked else ("(закрыто)" if not obj.is_open else "")
                 if verbose:
                     description += f"{furn.name} {status}. {furn.description}\n"
                 else:
                     description += f"{furn.name} {status}\n"
-            elif furn.kind == "door":
-                status = "(открыто)" if obj.flags["open"] else "(закрыто)"
+            elif furn.kind is ObjectKind.DOOR:
+                status = "(открыто)" if obj.is_open else "(закрыто)"
                 description += f"{furn.name}{status}. {furn.description}\n"
-            elif furn.kind == "switch":
-                status = "(включено)" if obj.flags["turned_on"] else "(выключено)"
+            elif furn.kind is ObjectKind.SWITCH:
+                status = "(включено)" if obj.is_on else "(выключено)"
                 description += f"{furn.name}{status}. {furn.description}\n"
 
         floor_items = [self.content.items[iid].name for iid in self.state.locations_items[self.state.current_location]]

@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Callable
 
+from damsel.model.content import ObjectKind
 from damsel.model.types import (
     INVENTORY_LOCATION_ID,
     Effect,
@@ -42,8 +43,8 @@ def unlock_container(data: dict) -> Effect:
 
     def _effect(state: "GameState", content: "GameContent") -> None:
         c = state.objects[cid]
-        c.flags["locked"] = False
-        c.flags["open"] = True
+        c.is_locked = False
+        c.is_open = True
 
     return _effect
 
@@ -105,11 +106,11 @@ def open_object(data: dict) -> Effect:
 
     def _effect(state: "GameState", content: "GameContent") -> None:
         odef = content.furniture.get(oid)
-        if not odef.can_open:
+        if odef is None or not odef.can_open:
             raise ValueError(f"Object {oid} is not openable")
-        state.objects[oid].flags["open"] = True
-        if odef.kind == "door" and odef.link_to:
-            state.objects[odef.link_to].flags["open"] = True
+        state.objects[oid].is_open = True
+        if odef.kind is ObjectKind.DOOR and odef.link_to:
+            state.objects[odef.link_to].is_open = True
 
     return _effect
 
@@ -122,8 +123,8 @@ def close_object(data: dict) -> Effect:
         odef = content.furniture[oid]
         if not odef.can_open:
             raise ValueError(f"Object {oid} is not openable")
-        state.objects[oid].flags["open"] = False
-        if odef.kind == "door" and odef.link_to:
-            state.objects[odef.link_to].flags["open"] = False
+        state.objects[oid].is_open = False
+        if odef.kind is ObjectKind.DOOR and odef.link_to:
+            state.objects[odef.link_to].is_open = False
 
     return _effect

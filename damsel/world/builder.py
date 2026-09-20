@@ -1,6 +1,7 @@
 from damsel.model.content import (
     GameContent, RawContent,
     ItemDef, FurnitureDef, LocationDef, Choice, Result,
+    ObjectKind, ChoiceScope,
 )
 from damsel.model.state import GameState, ObjectState
 from damsel.model.types import ItemId, ObjectId, LocationId, Condition, Effect, INVENTORY_LOCATION_ID
@@ -57,7 +58,7 @@ class ContentBuilder:
         obj_id = ObjectId(oid)
         self._furniture[obj_id] = FurnitureDef(
             id=obj_id,
-            kind=data["kind"],
+            kind=ObjectKind(data["kind"]),
             name=data["name"],
             description=data["description"],
             is_container=data.get("is_container", False),
@@ -68,11 +69,9 @@ class ContentBuilder:
             link_to=ObjectId(data["link_to"]) if data.get("link_to") else None,
         )
         self._object_states[obj_id] = ObjectState(
-            flags={
-                "locked": data.get("locked", False),
-                "open": data.get("open", True),
-                "turned_on": data.get("turned_on", False),
-            },
+            is_locked=data.get("locked", False),
+            is_open=data.get("open", True),
+            is_on=data.get("turned_on", False),
             items=[ItemId(iid) for iid in data.get("contents", []) if iid],
         )
 
@@ -109,4 +108,5 @@ class ContentBuilder:
             result=result,
             when=conditions,
             do=effects,
+            scope=ChoiceScope(data.get("scope", ChoiceScope.LOCATION)),
         )

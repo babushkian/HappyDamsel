@@ -15,6 +15,25 @@ class UIContext(StrEnum):
     OBJECT_FOCUS = auto()
     ITEM_FOCUS = auto()
 
+
+@unique
+class ObjectKind(StrEnum):
+    """Виды фурнитуры. Значения совпадают со строками в data/objects/*.yaml."""
+
+    CONTAINER = auto()
+    DOOR = auto()
+    SWITCH = auto()
+
+
+@unique
+class ChoiceScope(StrEnum):
+    """В каком UI-контексте показывать статический выбор из YAML."""
+
+    LOCATION = auto()
+    ITEM_FOCUS = auto()
+    OBJECT_FOCUS = auto()
+
+
 @dataclass(frozen=True)
 class ItemDef:
     id: ItemId
@@ -26,7 +45,7 @@ class ItemDef:
 @dataclass(frozen=True)
 class FurnitureDef:
     id: ObjectId
-    kind: str
+    kind: ObjectKind
     name: str
     description: str
     can_open: bool = False
@@ -55,7 +74,7 @@ class Result:
     params: dict[str, str] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True)
 class Choice:
     id: str
     text: str
@@ -63,6 +82,7 @@ class Choice:
     do: list[Effect] = field(default_factory=list)
     result_text: str | None = None
     result: Result | None = None
+    scope: ChoiceScope = ChoiceScope.LOCATION
     is_ui: bool = False
 
     def is_available(self, state: GameState, content: GameContent) -> bool:
