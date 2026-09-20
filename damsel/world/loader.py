@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 import yaml
 from damsel.model.content import RawContent
 
@@ -17,17 +17,17 @@ class YamlLoader:
         items = cls._load_yaml("items.yaml")
         choices = cls._load_yaml("choices.yaml").get("choices", {})
 
-        locations: dict = {}
+        locations: dict[str, Any] = {}
         for path in (cls.DATA_DIR / "locations").glob("*.yaml"):
             locations[path.stem] = cls._load_yaml(f"locations/{path.name}")
 
-        objects: dict = {}
+        objects: dict[str, Any] = {}
         for path in (cls.DATA_DIR / "objects").glob("*.yaml"):
             objects.update(cls._load_yaml(f"objects/{path.name}"))
 
         return RawContent(items=items, locations=locations, objects=objects, choices=choices)
 
     @classmethod
-    def _load_yaml(cls, relative: str) -> dict:
+    def _load_yaml(cls, relative: str) -> dict[str, Any]:
         with (cls.DATA_DIR / relative).open(encoding="utf-8") as f:
             return yaml.safe_load(f) or {}

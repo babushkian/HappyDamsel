@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from enum import StrEnum, auto, unique
 from damsel.model.types import Condition, Effect, ItemId, LocationId, ObjectId
 
 if TYPE_CHECKING:
-    from damsel.model import GameContent, GameState
+    from damsel.model.state import GameState
+
 
 @unique
 class UIContext(StrEnum):
@@ -98,7 +99,9 @@ class GameContent:
 
 @dataclass(frozen=True)
 class RawContent:
-    items: dict = field(default_factory=dict)
-    locations: dict = field(default_factory=dict)
-    objects: dict = field(default_factory=dict)
-    choices: dict = field(default_factory=dict)
+    """Сырые данные из YAML; валидация и типизация — в world/builder.py."""
+
+    items: dict[str, Any] = field(default_factory=dict)
+    locations: dict[str, Any] = field(default_factory=dict)
+    objects: dict[str, Any] = field(default_factory=dict)
+    choices: dict[str, Any] = field(default_factory=dict)

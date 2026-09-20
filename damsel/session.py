@@ -51,7 +51,9 @@ class GameSession:
         self._content = content
         self._state = state
         self._max_ticks = max_ticks
-        self._providers: Providers = providers if providers is not None else default_providers()
+        self._providers: Providers = (
+            providers if providers is not None else default_providers()
+        )
         self._ui: list[UIContext] = [UIContext.LOCATION]
         self._focused_item: ItemId | None = None
         self._focused_object: ObjectId | None = None

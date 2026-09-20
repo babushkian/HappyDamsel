@@ -38,7 +38,9 @@ class ActionProvider:
         raise NotImplementedError
 
 
-def _nav(id_: str, text: str, kind: NavKind, target: ItemId | ObjectId | None = None) -> NavAction:
+def _nav(
+    id_: str, text: str, kind: NavKind, target: ItemId | ObjectId | None = None
+) -> NavAction:
     return NavAction(id=ActionId(id_), text=text, kind=kind, target=target)
 
 

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from damsel.model.content import ObjectKind
 from damsel.model.types import (
@@ -13,12 +13,12 @@ if TYPE_CHECKING:
     from damsel.model.content import GameContent
     from damsel.model.state import GameState
 
-EffectFactory = Callable[[dict], Effect]
+EffectFactory = Callable[[dict[str, Any]], Effect]
 EFFECTS: dict[str, EffectFactory] = {}
 
 
-def register_effect(name: str):
-    def decorator(fn: EffectFactory):
+def register_effect(name: str) -> Callable[[EffectFactory], EffectFactory]:
+    def decorator(fn: EffectFactory) -> EffectFactory:
         EFFECTS[name] = fn
         return fn
 
@@ -26,7 +26,7 @@ def register_effect(name: str):
 
 
 @register_effect("consume_item")
-def consume_item(data: dict) -> Effect:
+def consume_item(data: dict[str, Any]) -> Effect:
     item = ItemId(data["item"])
 
     def _effect(state: "GameState", content: "GameContent") -> None:
@@ -38,7 +38,7 @@ def consume_item(data: dict) -> Effect:
 
 
 @register_effect("unlock_container")
-def unlock_container(data: dict) -> Effect:
+def unlock_container(data: dict[str, Any]) -> Effect:
     cid = ObjectId(data["container"])
 
     def _effect(state: "GameState", content: "GameContent") -> None:
@@ -50,7 +50,7 @@ def unlock_container(data: dict) -> Effect:
 
 
 @register_effect("reveal_contents")
-def reveal_contents(data: dict) -> Effect:
+def reveal_contents(data: dict[str, Any]) -> Effect:
     cid = ObjectId(data["container"])
 
     def _effect(state: "GameState", content: "GameContent") -> None:
@@ -63,7 +63,7 @@ def reveal_contents(data: dict) -> Effect:
 
 
 @register_effect("get_item")
-def get_item(data: dict) -> Effect:
+def get_item(data: dict[str, Any]) -> Effect:
     iid = ItemId(data["item"])
 
     def _effect(state: "GameState", content: "GameContent") -> None:
@@ -76,7 +76,7 @@ def get_item(data: dict) -> Effect:
 
 
 @register_effect("drop_item")
-def drop_item(data: dict) -> Effect:
+def drop_item(data: dict[str, Any]) -> Effect:
     iid = ItemId(data["item"])
 
     def _effect(state: "GameState", content: "GameContent") -> None:
@@ -89,7 +89,7 @@ def drop_item(data: dict) -> Effect:
 
 
 @register_effect("move_to")
-def move_to(data: dict) -> Effect:
+def move_to(data: dict[str, Any]) -> Effect:
     lid = LocationId(data["location"])
 
     def _effect(state: "GameState", content: "GameContent") -> None:
@@ -101,7 +101,7 @@ def move_to(data: dict) -> Effect:
 
 
 @register_effect("open_object")
-def open_object(data: dict) -> Effect:
+def open_object(data: dict[str, Any]) -> Effect:
     oid = ObjectId(data["object"])
 
     def _effect(state: "GameState", content: "GameContent") -> None:
@@ -116,7 +116,7 @@ def open_object(data: dict) -> Effect:
 
 
 @register_effect("close_object")
-def close_object(data: dict) -> Effect:
+def close_object(data: dict[str, Any]) -> Effect:
     oid = ObjectId(data["object"])
 
     def _effect(state: "GameState", content: "GameContent") -> None:

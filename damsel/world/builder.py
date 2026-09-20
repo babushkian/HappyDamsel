@@ -1,15 +1,21 @@
+from typing import Any
+
 from damsel.model.content import (
-    GameContent, RawContent,
-    ItemDef, FurnitureDef, LocationDef, Choice, Result,
-    ObjectKind, ChoiceScope,
+    GameContent,
+    ItemDef,
+    FurnitureDef,
+    LocationDef,
+    Choice,
+    Result,
+    ObjectKind,
+    ChoiceScope,
 )
 from damsel.model.state import GameState, ObjectState
-from damsel.model.types import ItemId, ObjectId, LocationId, Condition, Effect, INVENTORY_LOCATION_ID
+from damsel.model.types import ItemId, ObjectId, LocationId, Condition, Effect
 from damsel.world.loader import Loader
 
 
 class ContentBuilder:
-
     def __init__(self, loader: Loader) -> None:
         self._raw = loader.load()
         self._items: dict[ItemId, ItemDef] = {}
@@ -45,7 +51,7 @@ class ContentBuilder:
         )
         return content, state
 
-    def _build_item(self, iid: str, data: dict) -> None:
+    def _build_item(self, iid: str, data: dict[str, Any]) -> None:
         item_id = ItemId(iid)
         self._items[item_id] = ItemDef(
             id=item_id,
@@ -54,7 +60,7 @@ class ContentBuilder:
             consumable=data["consumable"],
         )
 
-    def _build_furniture(self, oid: str, data: dict) -> None:
+    def _build_furniture(self, oid: str, data: dict[str, Any]) -> None:
         obj_id = ObjectId(oid)
         self._furniture[obj_id] = FurnitureDef(
             id=obj_id,
@@ -75,7 +81,7 @@ class ContentBuilder:
             items=[ItemId(iid) for iid in data.get("contents", []) if iid],
         )
 
-    def _build_location(self, lid: str, data: dict) -> None:
+    def _build_location(self, lid: str, data: dict[str, Any]) -> None:
         location_id = LocationId(lid)
         raw_items = data.get("items", [])
         self._location_items[location_id] = [ItemId(iid) for iid in raw_items if iid]
@@ -87,11 +93,13 @@ class ContentBuilder:
             items=self._location_items[location_id],
         )
 
-    def _build_choice(self, cid: str, data: dict) -> None:
+    def _build_choice(self, cid: str, data: dict[str, Any]) -> None:
         from damsel.actions.conditions import CONDITIONS
         from damsel.actions.effects import EFFECTS
 
-        conditions: list[Condition] = [CONDITIONS[c["type"]](c) for c in data.get("conditions", [])]
+        conditions: list[Condition] = [
+            CONDITIONS[c["type"]](c) for c in data.get("conditions", [])
+        ]
         effects: list[Effect] = [EFFECTS[e["type"]](e) for e in data.get("effects", [])]
 
         result = None

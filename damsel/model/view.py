@@ -66,7 +66,9 @@ class GameView:
     finished: bool = False
 
 
-def object_status(kind: ObjectKind, defn_can_open: bool, st: ObjectState) -> ObjectStatus | None:
+def object_status(
+    kind: ObjectKind, defn_can_open: bool, st: ObjectState
+) -> ObjectStatus | None:
     match kind:
         case ObjectKind.CONTAINER:
             if st.is_locked:

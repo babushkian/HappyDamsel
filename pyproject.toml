@@ -20,6 +20,9 @@ dev = [
 happydamsel = "damsel.cli:main"
 
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [tool.ruff]
 # Максимальная длина строки (можно сделать как в Black)
 line-length = 94
