@@ -1,4 +1,5 @@
 from damsel.model.content import Result, GameContent
+from damsel.model.types import ItemId, ObjectId
 
 TEMPLATES = {
     "generic_unlock": "Ты открыл {object} с помощью {item}.",
@@ -12,12 +13,14 @@ TEMPLATES = {
 def render_template(result: Result, content: GameContent) -> str:
     if result.template not in TEMPLATES:
         raise ValueError(f"Шаблон {result.template!r} не найден")
-    resolved = {}
+    resolved: dict[str, str] = {}
     for key, value in result.params.items():
-        if value in content.items:
-            resolved[key] = content.items[value].name
-        elif value in content.furniture:
-            resolved[key] = content.furniture[value].name
+        item = content.items.get(ItemId(value))
+        furn = content.furniture.get(ObjectId(value))
+        if item is not None:
+            resolved[key] = item.name
+        elif furn is not None:
+            resolved[key] = furn.name
         else:
             resolved[key] = value
     return TEMPLATES[result.template].format(**resolved)

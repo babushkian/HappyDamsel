@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from enum import StrEnum, auto, unique
 from damsel.model.types import Condition, Effect, ItemId, LocationId, ObjectId
 
 if TYPE_CHECKING:
-    from damsel.model import GameContent, GameState
+    from damsel.model.state import GameState
+
 
 @unique
 class UIContext(StrEnum):
@@ -14,6 +15,25 @@ class UIContext(StrEnum):
     INVENTORY = auto()
     OBJECT_FOCUS = auto()
     ITEM_FOCUS = auto()
+
+
+@unique
+class ObjectKind(StrEnum):
+    """Виды фурнитуры. Значения совпадают со строками в data/objects/*.yaml."""
+
+    CONTAINER = auto()
+    DOOR = auto()
+    SWITCH = auto()
+
+
+@unique
+class ChoiceScope(StrEnum):
+    """В каком UI-контексте показывать статический выбор из YAML."""
+
+    LOCATION = auto()
+    ITEM_FOCUS = auto()
+    OBJECT_FOCUS = auto()
+
 
 @dataclass(frozen=True)
 class ItemDef:
@@ -26,7 +46,7 @@ class ItemDef:
 @dataclass(frozen=True)
 class FurnitureDef:
     id: ObjectId
-    kind: str
+    kind: ObjectKind
     name: str
     description: str
     can_open: bool = False
@@ -35,14 +55,6 @@ class FurnitureDef:
     is_transparent: bool = False
     turnable: bool = False
     link_to: ObjectId | None = None
-
-
-@dataclass(frozen=True)
-class ExitDef:
-    target: LocationId
-    text: str
-    when: list[Condition] = field(default_factory=list)
-    do: list[Effect] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -63,7 +75,7 @@ class Result:
     params: dict[str, str] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True)
 class Choice:
     id: str
     text: str
@@ -71,23 +83,10 @@ class Choice:
     do: list[Effect] = field(default_factory=list)
     result_text: str | None = None
     result: Result | None = None
-    is_ui: bool = False
+    scope: ChoiceScope = ChoiceScope.LOCATION
 
     def is_available(self, state: GameState, content: GameContent) -> bool:
         return all(cond(state, content) for cond in self.when)
-
-    def apply(self, state: GameState, content: GameContent) -> str:
-        if not self.is_available(state, content):
-            raise RuntimeError("Conditions not met")
-        for effect in self.do:
-            effect(state, content)
-        if self.result_text is not None:
-            return self.result_text
-        if self.result is not None:
-            from damsel.rendering.templates import render_template
-
-            return render_template(self.result, content)
-        return ""
 
 
 @dataclass(frozen=True)
@@ -100,7 +99,9 @@ class GameContent:
 
 @dataclass(frozen=True)
 class RawContent:
-    items: dict = field(default_factory=dict)
-    locations: dict = field(default_factory=dict)
-    objects: dict = field(default_factory=dict)
-    choices: dict = field(default_factory=dict)
+    """Сырые данные из YAML; валидация и типизация — в world/builder.py."""
+
+    items: dict[str, Any] = field(default_factory=dict)
+    locations: dict[str, Any] = field(default_factory=dict)
+    objects: dict[str, Any] = field(default_factory=dict)
+    choices: dict[str, Any] = field(default_factory=dict)

@@ -1,3 +1,3 @@
-from damsel.game import main
+from damsel.cli import main
 
 main()
