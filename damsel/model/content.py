@@ -2,11 +2,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
-
+from enum import StrEnum, auto, unique
 from damsel.model.types import Condition, Effect, ItemId, LocationId, ObjectId
 
 if TYPE_CHECKING:
     from damsel.model import GameContent, GameState
+
+@unique
+class UIContext(StrEnum):
+    LOCATION = auto()
+    INVENTORY = auto()
+    OBJECT_FOCUS = auto()
+    ITEM_FOCUS = auto()
 
 @dataclass(frozen=True)
 class ItemDef:
@@ -44,6 +51,9 @@ class LocationDef:
     name: str
     description: str
     objects: list[ObjectId]
+    # TODO это очень спорное решение, так как список предметов в локации актуален только вначале игры
+    #  потом предметы могут перемещаться
+    #  если в программе имеются обращения к этому полю, это очень опасно
     items: list[ItemId]
 
 
@@ -61,6 +71,7 @@ class Choice:
     do: list[Effect] = field(default_factory=list)
     result_text: str | None = None
     result: Result | None = None
+    is_ui: bool = False
 
     def is_available(self, state: GameState, content: GameContent) -> bool:
         return all(cond(state, content) for cond in self.when)
@@ -74,6 +85,7 @@ class Choice:
             return self.result_text
         if self.result is not None:
             from damsel.rendering.templates import render_template
+
             return render_template(self.result, content)
         return ""
 

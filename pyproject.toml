@@ -18,8 +18,18 @@ dev = [
 [project.scripts]
 happydamsel = "damsel.game:main"
 
+
+[tool.ruff]
+# Максимальная длина строки (можно сделать как в Black)
+line-length = 94
+src = ["./damsel"]
+
+
 [tool.mypy]
 python_version = "3.13"
-strict = false
+strict = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
+mypy_path = "damsel"
+ignore_missing_imports = true
+show_error_codes = true
