@@ -83,23 +83,9 @@ class Choice:
     result_text: str | None = None
     result: Result | None = None
     scope: ChoiceScope = ChoiceScope.LOCATION
-    is_ui: bool = False
 
     def is_available(self, state: GameState, content: GameContent) -> bool:
         return all(cond(state, content) for cond in self.when)
-
-    def apply(self, state: GameState, content: GameContent) -> str:
-        if not self.is_available(state, content):
-            raise RuntimeError("Conditions not met")
-        for effect in self.do:
-            effect(state, content)
-        if self.result_text is not None:
-            return self.result_text
-        if self.result is not None:
-            from damsel.model.templates import render_template
-
-            return render_template(self.result, content)
-        return ""
 
 
 @dataclass(frozen=True)

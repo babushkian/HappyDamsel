@@ -17,7 +17,7 @@ dev = [
 ]
 
 [project.scripts]
-happydamsel = "damsel.game:main"
+happydamsel = "damsel.cli:main"
 
 
 [tool.ruff]

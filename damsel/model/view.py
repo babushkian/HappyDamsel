@@ -12,7 +12,7 @@ from enum import StrEnum, auto, unique
 
 from damsel.model.content import GameContent, ObjectKind, UIContext
 from damsel.model.state import GameState, ObjectState
-from damsel.model.types import INVENTORY_LOCATION_ID, ItemId, LocationId, ObjectId
+from damsel.model.types import ActionId, ItemId, LocationId, ObjectId
 
 
 @unique
@@ -48,7 +48,7 @@ class ObjectView:
 
 @dataclass(frozen=True)
 class ActionView:
-    id: str
+    id: ActionId  # непрозрачен: фронтенд возвращает его в dispatch() как есть
     text: str
     kind: ActionKind
 
