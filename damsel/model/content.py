@@ -96,7 +96,7 @@ class Choice:
         if self.result_text is not None:
             return self.result_text
         if self.result is not None:
-            from damsel.rendering.templates import render_template
+            from damsel.model.templates import render_template
 
             return render_template(self.result, content)
         return ""
