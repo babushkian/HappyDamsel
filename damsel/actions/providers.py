@@ -151,6 +151,9 @@ class ItemFocusProvider(ActionProvider):
     def provide(self, ctx: ProviderContext) -> Iterator[Action]:
         if ctx.focused_item is None:
             return
+        # Страховка от протухшего фокуса: предмет должен лежать в инвентаре.
+        if ctx.focused_item not in ctx.state.locations_items[INVENTORY_LOCATION_ID]:
+            return
         item = ctx.content.items[ctx.focused_item]
         yield GameAction(
             Choice(

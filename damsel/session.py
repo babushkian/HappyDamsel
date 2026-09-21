@@ -118,7 +118,22 @@ class GameSession:
                 self._navigate(action)
             case GameAction():
                 self._message = self._apply(action.choice)
+                self._sync_focus()
         self._ticks += 1
+
+    def _sync_focus(self) -> None:
+        """Фокус на предмете валиден, пока предмет в инвентаре.
+
+        После выброса/использования предмета закрываем ITEM_FOCUS и возвращаемся
+        в предыдущий контекст — иначе провайдеры продолжат предлагать действия
+        для предмета, которого уже нет в инвентаре.
+        """
+        if self._ui[-1] is not UIContext.ITEM_FOCUS:
+            return
+        inv = self._state.locations_items[INVENTORY_LOCATION_ID]
+        if self._focused_item is None or self._focused_item not in inv:
+            self._ui.pop()
+            self._focused_item = None
 
     def _collect_actions(self, ctx: UIContext) -> list[Action]:
         provider_ctx = ProviderContext(

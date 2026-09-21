@@ -98,6 +98,35 @@ def test_item_focus_examine_and_drop() -> None:
     assert session.get_view().message == content.items[ItemId("hammer")].description
 
 
+def test_drop_item_exits_focus_and_cannot_be_repeated() -> None:
+    _, session = make_session()
+    view = session.get_view()
+    session.dispatch(find_action(view, "Взять Молоток").id)
+    view = session.get_view()
+    session.dispatch(find_action(view, "Заглянуть в инвентарь").id)
+    view = session.get_view()
+    session.dispatch(find_action(view, "Осмотреть Молоток").id)
+    view = session.get_view()
+    assert view.context is UIContext.ITEM_FOCUS
+    drop = find_action(view, "Выбросить Молоток")
+    session.dispatch(drop.id)
+
+    # После выброса фокус закрыт, вернулись в инвентарь без молотка
+    view = session.get_view()
+    assert view.context is UIContext.INVENTORY
+    assert all(i.id != ItemId("hammer") for i in view.inventory)
+    assert not any("Выбросить" in a.text for a in view.actions)
+
+    # Старый id «выбросить» больше не действует
+    with pytest.raises(UnknownActionError):
+        session.dispatch(drop.id)
+
+    # Молоток лежит в локации — и только один раз
+    session.dispatch(find_action(view, "Выйти из инвентаря").id)
+    view = session.get_view()
+    assert [i.id for i in view.floor_items].count(ItemId("hammer")) == 1
+
+
 def test_object_focus_open_take_close() -> None:
     _, session = make_session()
     # спуститься в коридор

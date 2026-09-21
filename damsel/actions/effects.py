@@ -81,9 +81,11 @@ def drop_item(data: dict[str, Any]) -> Effect:
 
     def _effect(state: "GameState", content: "GameContent") -> None:
         inv = state.locations_items[INVENTORY_LOCATION_ID]
+        # Переносим в локацию только если предмет действительно был в инвентаре,
+        # иначе повторное применение эффекта продублировало бы предмет.
         if iid in inv:
             inv.remove(iid)
-        state.locations_items[state.current_location].append(iid)
+            state.locations_items[state.current_location].append(iid)
 
     return _effect
 
