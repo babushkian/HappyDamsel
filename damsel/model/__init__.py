@@ -11,6 +11,7 @@ from damsel.model.content import (
     ItemDef,
     FurnitureDef,
     LocationDef,
+    ObjectOverride,
     Result,
     Choice,
     GameContent,
@@ -20,6 +21,7 @@ from damsel.model.content import (
     ChoiceScope,
 )
 from damsel.model.state import GameState, ObjectState
+from damsel.model.text import ConditionalText, Text, resolve_text
 
 __all__ = [
     "ItemId",
@@ -41,4 +43,8 @@ __all__ = [
     "ChoiceScope",
     "GameState",
     "ObjectState",
+    "ObjectOverride",
+    "ConditionalText",
+    "Text",
+    "resolve_text",
 ]

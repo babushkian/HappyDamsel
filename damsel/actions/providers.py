@@ -18,6 +18,12 @@ from damsel.model.content import (
     Result,
     UIContext,
 )
+from damsel.model.display import (
+    are_contents_visible,
+    description_text,
+    display_name,
+    is_object_visible,
+)
 from damsel.model.state import GameState
 from damsel.model.types import ActionId, ItemId, ObjectId, INVENTORY_LOCATION_ID
 
@@ -84,7 +90,14 @@ class ContainerActionsProvider(ActionProvider):
     def _targets(self, ctx: ProviderContext) -> list[ObjectId]:
         if ctx.ui_context is UIContext.OBJECT_FOCUS and ctx.focused_object is not None:
             return [ctx.focused_object]
-        return list(ctx.content.locations[ctx.state.current_location].objects)
+        return [
+            oid
+            for oid in ctx.content.locations[ctx.state.current_location].objects
+            if is_object_visible(ctx.content, ctx.state, oid)
+        ]
+
+    def _name(self, ctx: ProviderContext, oid: ObjectId) -> str:
+        return display_name(ctx.content, ctx.state.current_location, oid)
 
     def provide(self, ctx: ProviderContext) -> Iterator[Action]:
         targets = self._targets(ctx)
@@ -95,7 +108,7 @@ class ContainerActionsProvider(ActionProvider):
                 yield GameAction(
                     Choice(
                         id=f"open_{oid}",
-                        text=f"Открыть {furn.name}",
+                        text=f"Открыть {self._name(ctx, oid)}",
                         result=Result("generic_open", {"object": oid}),
                         do=[EFFECTS["open_object"]({"object": oid})],
                     )
@@ -107,7 +120,7 @@ class ContainerActionsProvider(ActionProvider):
                 yield GameAction(
                     Choice(
                         id=f"close_{oid}",
-                        text=f"Закрыть {furn.name}",
+                        text=f"Закрыть {self._name(ctx, oid)}",
                         result=Result("generic_close", {"object": oid}),
                         do=[EFFECTS["close_object"]({"object": oid})],
                     )
@@ -116,7 +129,11 @@ class ContainerActionsProvider(ActionProvider):
             for oid in targets:
                 furn = ctx.content.furniture[oid]
                 obj = ctx.state.objects[oid]
-                if furn.is_container and obj.is_open:
+                if (
+                    furn.is_container
+                    and obj.is_open
+                    and are_contents_visible(ctx.content, ctx.state, oid)
+                ):
                     for iid in obj.items:
                         yield GameAction(
                             Choice(
@@ -128,18 +145,56 @@ class ContainerActionsProvider(ActionProvider):
                         )
 
 
+class SwitchActionsProvider(ActionProvider):
+    """Включить/выключить переключатели (свет)."""
+
+    def _targets(self, ctx: ProviderContext) -> list[ObjectId]:
+        if ctx.ui_context is UIContext.OBJECT_FOCUS and ctx.focused_object is not None:
+            return [ctx.focused_object]
+        return list(ctx.content.locations[ctx.state.current_location].objects)
+
+    def provide(self, ctx: ProviderContext) -> Iterator[Action]:
+        for oid in self._targets(ctx):
+            furn = ctx.content.furniture[oid]
+            obj = ctx.state.objects[oid]
+            if not furn.turnable or not is_object_visible(ctx.content, ctx.state, oid):
+                continue
+            name = display_name(ctx.content, ctx.state.current_location, oid)
+            if obj.is_on:
+                yield GameAction(
+                    Choice(
+                        id=f"turn_off_{oid}",
+                        text=f"Выключить {name}",
+                        result=Result("generic_turn_off", {"object": oid}),
+                        do=[EFFECTS["toggle_object"]({"object": oid})],
+                    )
+                )
+            else:
+                yield GameAction(
+                    Choice(
+                        id=f"turn_on_{oid}",
+                        text=f"Включить {name}",
+                        result=Result("generic_turn_on", {"object": oid}),
+                        do=[EFFECTS["toggle_object"]({"object": oid})],
+                    )
+                )
+
+
 class ObjectFocusProvider(ActionProvider):
     """Осмотр сфокусированного объекта."""
 
     def provide(self, ctx: ProviderContext) -> Iterator[Action]:
         if ctx.focused_object is None:
             return
-        furn = ctx.content.furniture[ctx.focused_object]
+        oid = ctx.focused_object
+        name = display_name(ctx.content, ctx.state.current_location, oid)
         yield GameAction(
             Choice(
-                id=f"examine_{ctx.focused_object}",
-                text=f"Осмотреть: {furn.name}",
-                result_text=furn.description,
+                id=f"examine_{oid}",
+                text=f"Осмотреть: {name}",
+                # Text резолвится в момент применения: описание объекта может
+                # зависеть от состояния мира (свет, открытые двери и т.п.).
+                result_text=description_text(ctx.content, ctx.state.current_location, oid),
                 do=[],
             )
         )
@@ -159,6 +214,8 @@ class ItemFocusProvider(ActionProvider):
             Choice(
                 id=f"examine_{ctx.focused_item}",
                 text=f"Осмотреть {item.name}",
+                # Text резолвится в момент применения: описание предмета может
+                # зависеть от окружения (например, записку не прочесть в темноте).
                 result_text=item.description,
                 do=[],
             )
@@ -191,10 +248,11 @@ class NavigationProvider(ActionProvider):
                 yield _nav("nav:inventory", "Заглянуть в инвентарь", NavKind.OPEN_INVENTORY)
                 location = ctx.content.locations[ctx.state.current_location]
                 for oid in location.objects:
-                    furn = ctx.content.furniture[oid]
+                    if not is_object_visible(ctx.content, ctx.state, oid):
+                        continue
                     yield _nav(
                         f"nav:obj:{oid}",
-                        f"Взаимодействовать с {furn.name}",
+                        f"Взаимодействовать с {display_name(ctx.content, ctx.state.current_location, oid)}",
                         NavKind.FOCUS_OBJECT,
                         oid,
                     )
@@ -213,6 +271,7 @@ def default_providers() -> dict[UIContext, list[ActionProvider]]:
             StaticChoicesProvider(ChoiceScope.LOCATION),
             FloorItemsProvider(),
             ContainerActionsProvider(),
+            SwitchActionsProvider(),
             NavigationProvider(),
         ],
         UIContext.INVENTORY: [
@@ -227,6 +286,7 @@ def default_providers() -> dict[UIContext, list[ActionProvider]]:
         UIContext.OBJECT_FOCUS: [
             ObjectFocusProvider(),
             ContainerActionsProvider(),
+            SwitchActionsProvider(),
             NavigationProvider(),
         ],
     }

@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Any, Callable
 
-from damsel.model.content import ObjectKind
 from damsel.model.types import (
     INVENTORY_LOCATION_ID,
     Effect,
@@ -70,6 +69,12 @@ def get_item(data: dict[str, Any]) -> Effect:
         loc_items = state.locations_items[state.current_location]
         if iid in loc_items:
             loc_items.remove(iid)
+        # Предмет мог лежать в контейнере текущей локации (напр. стамеска на
+        # стеллаже) — убираем его и оттуда, иначе «Взять» можно повторить.
+        for oid in content.locations[state.current_location].objects:
+            obj = state.objects.get(oid)
+            if obj is not None and iid in obj.items:
+                obj.items.remove(iid)
         state.locations_items[INVENTORY_LOCATION_ID].append(iid)
 
     return _effect
@@ -111,8 +116,6 @@ def open_object(data: dict[str, Any]) -> Effect:
         if odef is None or not odef.can_open:
             raise ValueError(f"Object {oid} is not openable")
         state.objects[oid].is_open = True
-        if odef.kind is ObjectKind.DOOR and odef.link_to:
-            state.objects[odef.link_to].is_open = True
 
     return _effect
 
@@ -126,7 +129,39 @@ def close_object(data: dict[str, Any]) -> Effect:
         if not odef.can_open:
             raise ValueError(f"Object {oid} is not openable")
         state.objects[oid].is_open = False
-        if odef.kind is ObjectKind.DOOR and odef.link_to:
-            state.objects[odef.link_to].is_open = False
+
+    return _effect
+
+
+@register_effect("toggle_object")
+def toggle_object(data: dict[str, Any]) -> Effect:
+    oid = ObjectId(data["object"])
+
+    def _effect(state: "GameState", content: "GameContent") -> None:
+        odef = content.furniture.get(oid)
+        if odef is None or not odef.turnable:
+            raise ValueError(f"Object {oid} is not turnable")
+        obj = state.objects[oid]
+        obj.is_on = not obj.is_on
+
+    return _effect
+
+
+@register_effect("set_flag")
+def set_flag(data: dict[str, Any]) -> Effect:
+    flag = data["flag"]
+
+    def _effect(state: "GameState", content: "GameContent") -> None:
+        state.flags[flag] = True
+
+    return _effect
+
+
+@register_effect("clear_flag")
+def clear_flag(data: dict[str, Any]) -> Effect:
+    flag = data["flag"]
+
+    def _effect(state: "GameState", content: "GameContent") -> None:
+        state.flags.pop(flag, None)
 
     return _effect

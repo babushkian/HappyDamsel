@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 from enum import StrEnum, auto, unique
+from damsel.model.text import Text
 from damsel.model.types import Condition, Effect, ItemId, LocationId, ObjectId
 
 if TYPE_CHECKING:
@@ -39,7 +40,7 @@ class ChoiceScope(StrEnum):
 class ItemDef:
     id: ItemId
     name: str
-    description: str
+    description: Text
     consumable: bool
 
 
@@ -48,25 +49,44 @@ class FurnitureDef:
     id: ObjectId
     kind: ObjectKind
     name: str
-    description: str
+    description: Text
     can_open: bool = False
     can_lock: bool = False
     is_container: bool = False
     is_transparent: bool = False
     turnable: bool = False
-    link_to: ObjectId | None = None
+    # Объект не виден, пока условия не выполнены (пусто — виден всегда).
+    visible_when: list[Condition] = field(default_factory=list)
+    # Содержимое контейнера скрыто, пока условия не выполнены.
+    contents_visible_when: list[Condition] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class ObjectOverride:
+    """Пер-локационное переопределение имени/описания объекта.
+
+    Нужно, когда один и тот же объект присутствует в двух локациях
+    (например, дверь), и с каждой стороны называется/описывается по-своему.
+    """
+
+    name: str | None = None
+    description: Text | None = None
 
 
 @dataclass(frozen=True)
 class LocationDef:
     id: LocationId
     name: str
-    description: str
+    description: Text
     objects: list[ObjectId]
+    # Освещённость — производный факт: пусто означает «всегда светло»,
+    # иначе свет есть, когда выполнены все условия (см. display.is_location_lit).
+    lit_when: list[Condition] = field(default_factory=list)
+    object_overrides: dict[ObjectId, ObjectOverride] = field(default_factory=dict)
     # TODO это очень спорное решение, так как список предметов в локации актуален только вначале игры
     #  потом предметы могут перемещаться
     #  если в программе имеются обращения к этому полю, это очень опасно
-    items: list[ItemId]
+    items: list[ItemId] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -81,7 +101,9 @@ class Choice:
     text: str
     when: list[Condition] = field(default_factory=list)
     do: list[Effect] = field(default_factory=list)
-    result_text: str | None = None
+    # Может быть условным: резолвится в момент применения (session._apply),
+    # чтобы текст не мог протухнуть между get_view и dispatch.
+    result_text: Text | None = None
     result: Result | None = None
     scope: ChoiceScope = ChoiceScope.LOCATION
 

@@ -17,8 +17,10 @@ from typing import cast
 from damsel.actions.providers import Providers, ProviderContext, default_providers
 from damsel.actions.types import Action, GameAction, NavAction, NavKind
 from damsel.model.content import Choice, GameContent, UIContext
+from damsel.model.display import is_object_visible
 from damsel.model.state import GameState
 from damsel.model.templates import render_template
+from damsel.model.text import resolve_text
 from damsel.model.types import (
     INVENTORY_LOCATION_ID,
     ActionId,
@@ -61,6 +63,9 @@ class GameSession:
         self._ticks = 0
         self._prev_location: LocationId = state.current_location
         self._actions: dict[ActionId, Action] = {}
+        # Последний показанный (резолвленный) текст описания каждой локации:
+        # если описание изменилось (включили свет), показываем шапку снова.
+        self._shown_descriptions: dict[LocationId, str | None] = {}
 
     @property
     def finished(self) -> bool:
@@ -78,10 +83,20 @@ class GameSession:
             location = self._content.locations[location_id]
             verbose = location_id not in self._state.visited_locations
             changed = location_id != self._prev_location
-            if verbose or changed:
+            resolved_description = resolve_text(
+                location.description, self._state, self._content
+            )
+            # Описание могло измениться с прошлого показа (включили свет) —
+            # показываем шапку и новый текст заново.
+            description_changed = (
+                self._shown_descriptions.get(location_id, ...) != resolved_description
+            )
+            if verbose or changed or description_changed:
                 title = location.name
-                description = location.description if verbose else None
+                if verbose or description_changed:
+                    description = resolved_description
                 self._state.set_location_visited()
+            self._shown_descriptions[location_id] = resolved_description
             objects = build_object_views(self._content, self._state, location_id, verbose)
             floor_items = [
                 item_view(self._content, iid)
@@ -127,13 +142,23 @@ class GameSession:
         После выброса/использования предмета закрываем ITEM_FOCUS и возвращаемся
         в предыдущий контекст — иначе провайдеры продолжат предлагать действия
         для предмета, которого уже нет в инвентаре.
+
+        Аналогично для OBJECT_FOCUS: объект мог стать невидимым (погас свет).
         """
-        if self._ui[-1] is not UIContext.ITEM_FOCUS:
-            return
-        inv = self._state.locations_items[INVENTORY_LOCATION_ID]
-        if self._focused_item is None or self._focused_item not in inv:
-            self._ui.pop()
-            self._focused_item = None
+        match self._ui[-1]:
+            case UIContext.ITEM_FOCUS:
+                inv = self._state.locations_items[INVENTORY_LOCATION_ID]
+                if self._focused_item is None or self._focused_item not in inv:
+                    self._ui.pop()
+                    self._focused_item = None
+            case UIContext.OBJECT_FOCUS:
+                if self._focused_object is None or not is_object_visible(
+                    self._content, self._state, self._focused_object
+                ):
+                    self._ui.pop()
+                    self._focused_object = None
+            case _:
+                pass
 
     def _collect_actions(self, ctx: UIContext) -> list[Action]:
         provider_ctx = ProviderContext(
@@ -165,7 +190,9 @@ class GameSession:
         for effect in choice.do:
             effect(self._state, self._content)
         if choice.result_text is not None:
-            return choice.result_text
+            # Резолвим ПОСЛЕ эффектов: условный текст должен отражать
+            # состояние мира, получившееся в результате действия.
+            return resolve_text(choice.result_text, self._state, self._content)
         if choice.result is not None:
             return render_template(choice.result, self._content)
         return None

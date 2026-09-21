@@ -7,6 +7,8 @@ TEMPLATES = {
     "generic_drop": "Ты выбросил {item}.",
     "generic_open": "Ты открыл {object}.",
     "generic_close": "Ты закрыл {object}.",
+    "generic_turn_on": "Щелк! Ты включил {object}.",
+    "generic_turn_off": "Щелк! Ты выключил {object}.",
 }
 
 

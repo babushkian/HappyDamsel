@@ -37,7 +37,11 @@ iron_chest:
 rack:
   kind: "container"
   name: "Стеллаж"
-  description: "Металлический стеллаж, заваленный всяким барахлом."
+  descriptions:
+    - when:
+        - type: location_lit
+      text: "Металлический стеллаж. На полке поблескивает стамеска."
+    - default: "В темноте угадываются силуэты металлического стеллажа, заваленного барахлом."
   is_container: true
   can_open: false
   can_lock: false
@@ -45,3 +49,5 @@ rack:
   locked: false
   contents:
     - chisel
+  contents_visible_when:
+    - type: location_lit

@@ -78,3 +78,79 @@ def object_is_closed(data: dict[str, Any]) -> Condition:
         return not o.is_open
 
     return _cond
+
+
+@register_condition("object_is_on")
+def object_is_on(data: dict[str, Any]) -> Condition:
+    oid = ObjectId(data["object"])
+
+    def _cond(state: GameState, content: GameContent) -> bool:
+        o = state.objects.get(oid)
+        if o is None:
+            raise ValueError(f"Object {oid} does not exist")
+        odef = content.furniture.get(oid)
+        if odef is None or not odef.turnable:
+            raise ValueError(f"Object {oid} is not turnable")
+        return o.is_on
+
+    return _cond
+
+
+@register_condition("object_is_off")
+def object_is_off(data: dict[str, Any]) -> Condition:
+    oid = ObjectId(data["object"])
+
+    def _cond(state: GameState, content: GameContent) -> bool:
+        o = state.objects.get(oid)
+        if o is None:
+            raise ValueError(f"Object {oid} does not exist")
+        odef = content.furniture.get(oid)
+        if odef is None or not odef.turnable:
+            raise ValueError(f"Object {oid} is not turnable")
+        return not o.is_on
+
+    return _cond
+
+
+@register_condition("location_lit")
+def location_lit(data: dict[str, Any]) -> Condition:
+    """Освещена ли локация. Без параметра — текущая локация игрока."""
+    from damsel.model.display import is_location_lit
+
+    lid = LocationId(data["location"]) if "location" in data else None
+
+    def _cond(state: GameState, content: GameContent) -> bool:
+        target = lid if lid is not None else state.current_location
+        return is_location_lit(content, state, target)
+
+    return _cond
+
+
+@register_condition("flag_set")
+def flag_set(data: dict[str, Any]) -> Condition:
+    flag = data["flag"]
+
+    def _cond(state: GameState, content: GameContent) -> bool:
+        return state.flags.get(flag, False)
+
+    return _cond
+
+
+@register_condition("flag_not_set")
+def flag_not_set(data: dict[str, Any]) -> Condition:
+    flag = data["flag"]
+
+    def _cond(state: GameState, content: GameContent) -> bool:
+        return not state.flags.get(flag, False)
+
+    return _cond
+
+
+@register_condition("never")
+def never(data: dict[str, Any]) -> Condition:
+    """Всегда ложно. Например, для lit_when вечно тёмной локации."""
+
+    def _cond(state: GameState, content: GameContent) -> bool:
+        return False
+
+    return _cond
