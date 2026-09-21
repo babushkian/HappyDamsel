@@ -1,6 +1,16 @@
 name: "Кладовка"
-description: "Темная тесная пыльная кладовка."
+descriptions:
+  - when:
+      - type: location_lit
+    text: "Тесная пыльная кладовка, теперь озаренная тусклым светом лампочки. На стеллаже видны инструменты."
+  - default: "Темная тесная пыльная кладовка. В кромешной тьме не разобрать, что здесь что."
+lit_when:
+  - type: object_is_on
+    object: switch
 objects:
   - rack
-  - closet_closet_door
+  - closet_door
+object_overrides:
+  closet_door:
+    name: "Дверь в коридор"
 items: []

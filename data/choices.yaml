@@ -54,6 +54,31 @@ choices:
 #        object: closet_door
 
 
+  read_note:
+    scope: item_focus
+    text: "Прочитать записку"
+    conditions:
+      - type: has_item
+        item: note
+      - type: location_lit
+      - type: flag_not_set
+        flag: note_read
+    effects:
+      - type: set_flag
+        flag: note_read
+    result_text: "Ты разворачиваешь записку. Выцветшие чернила гласят: «Если забить гвоздь в дощечку с тремя сучками, откроется путь на свободу»."
+
+  remember_note:
+    scope: item_focus
+    text: "Вспомнить текст записки"
+    conditions:
+      - type: has_item
+        item: note
+      - type: flag_set
+        flag: note_read
+    effects: []
+    result_text: "«Если забить гвоздь в дощечку с тремя сучками, откроется путь на свободу». Ты помнишь эти слова наизусть."
+
   from_attic_to_hall:
     text: "Спуститься вниз"
     result_text: "Ты спустился в прихожую."
@@ -81,7 +106,7 @@ choices:
       - type: in_location
         location: hall
       - type: object_is_open
-        object: hall_closet_door
+        object: closet_door
     effects:
       - type: move_to
         location: closet
@@ -93,8 +118,7 @@ choices:
       - type: in_location
         location: closet
       - type: object_is_open
-        object: closet_closet_door
-
+        object: closet_door
     effects:
       - type: move_to
         location: hall

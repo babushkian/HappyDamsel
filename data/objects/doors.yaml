@@ -1,4 +1,6 @@
-hall_closet_door:
+# Дверь одна на две локации (hall и closet ссылаются на один id).
+# Как она называется с каждой стороны — см. object_overrides в YAML локаций.
+closet_door:
   kind: "door"
   name: "Дверь в кладовку"
   description: "Хлипкая дверь, выкрашенная светлой краской. Без замка, с простенькой железной ручкой."
@@ -7,15 +9,3 @@ hall_closet_door:
   is_container: false
   locked: false
   open: false
-  link_to: closet_closet_door
-
-closet_closet_door:
-  kind: "door"
-  name: "Дверь в кладовку"
-  description: "Хлипкая дверь, выкрашенная светлой краской. Без замка, с простенькой железной ручкой."
-  can_open: true
-  can_lock: false
-  is_container: false
-  locked: false
-  open: false
-  link_to: hall_closet_door

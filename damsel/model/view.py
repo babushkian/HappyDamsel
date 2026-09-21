@@ -11,6 +11,12 @@ from dataclasses import dataclass, field
 from enum import StrEnum, auto, unique
 
 from damsel.model.content import GameContent, ObjectKind, UIContext
+from damsel.model.display import (
+    are_contents_visible,
+    display_description,
+    display_name,
+    is_object_visible,
+)
 from damsel.model.state import GameState, ObjectState
 from damsel.model.types import ActionId, ItemId, LocationId, ObjectId
 
@@ -94,18 +100,26 @@ def build_object_views(
 ) -> list[ObjectView]:
     views: list[ObjectView] = []
     for oid in content.locations[location_id].objects:
+        if not is_object_visible(content, state, oid):
+            continue
         defn = content.furniture[oid]
         st = state.objects[oid]
         show_description = verbose or defn.kind is not ObjectKind.CONTAINER
         items_inside: list[ItemView] = []
-        if defn.is_container and st.is_open and not st.is_locked:
+        if (
+            defn.is_container
+            and st.is_open
+            and not st.is_locked
+            and are_contents_visible(content, state, oid)
+        ):
             items_inside = [item_view(content, iid) for iid in st.items]
+        description = display_description(content, state, location_id, oid)
         views.append(
             ObjectView(
                 id=oid,
                 kind=defn.kind,
-                name=defn.name,
-                description=defn.description if show_description else None,
+                name=display_name(content, location_id, oid),
+                description=description if show_description else None,
                 status=object_status(defn.kind, defn.can_open, st),
                 items_inside=items_inside,
             )
